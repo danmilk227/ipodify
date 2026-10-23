@@ -80,14 +80,16 @@ pm2 save
 ```
 
 ### 5. Настройка Reverse Proxy (Nginx) + SSL (HTTPS)
-Так как Spotify Web Playback SDK **требует** контекст безопасности, вам нужен HTTPS-домен.
+Так как Spotify Web Playback SDK **требует** контекст безопасности, вам нужен HTTPS.
+Если у вас **нет собственного домена**, не беда! Мы будем использовать бесплатный сервис `nip.io`, который превращает ваш IP-адрес в доменное имя (например, если IP вашего сервера `123.45.67.89`, то ваш домен будет `123.45.67.89.nip.io`).
+
 Установите Nginx и Certbot:
 ```bash
 sudo apt update
 sudo apt install nginx certbot python3-certbot-nginx
 ```
 
-Создайте конфигурацию Nginx (замените `your-domain.com` на ваш домен):
+Создайте конфигурацию Nginx (замените `ВАШ_IP` на реальный IP вашего сервера, например `123.45.67.89`):
 ```bash
 sudo nano /etc/nginx/sites-available/ipodify
 ```
@@ -95,7 +97,7 @@ sudo nano /etc/nginx/sites-available/ipodify
 ```nginx
 server {
     listen 80;
-    server_name your-domain.com;
+    server_name ВАШ_IP.nip.io;
 
     location / {
         proxy_pass http://localhost:3000;
@@ -113,12 +115,14 @@ sudo ln -s /etc/nginx/sites-available/ipodify /etc/nginx/sites-enabled/
 sudo nginx -t
 sudo systemctl reload nginx
 ```
-Выпустите SSL-сертификат:
+Выпустите SSL-сертификат (снова замените `ВАШ_IP` на ваш IP сервера):
 ```bash
-sudo certbot --nginx -d your-domain.com
+sudo certbot --nginx -d ВАШ_IP.nip.io
 ```
 
-Готово! Теперь вы можете зайти на `https://your-domain.com` и использовать ваш iPodify.
+**Важно!** Не забудьте указать именно этот новый адрес `https://ВАШ_IP.nip.io/callback` в настройках приложения Spotify (раздел Redirect URIs) и в вашем файле `.env`!
+
+Готово! Теперь вы можете зайти на `https://ВАШ_IP.nip.io` и использовать ваш iPodify.
 
 ---
 **Важно**: Для воспроизведения музыки не забудьте, что текущее устройство (браузер) должно быть активно, и иногда, чтобы начать играть, требуется нажать кнопку `Play/Pause` или запустить трек через официальное приложение Spotify, выбрав устройство `iPodify Web Player`.
