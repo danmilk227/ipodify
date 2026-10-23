@@ -10,8 +10,11 @@ const state = {
     isPlaying: false,
     currentTrack: null,
     position: 0,
-    duration: 0
+    duration: 0,
+    volume: 0.5,
+    showVolume: false
 };
+let volumeTimeout = null;
 
 // DOM Elements
 const screenContent = document.getElementById('screen-content');
@@ -262,7 +265,8 @@ function renderNowPlaying(animateDir = null) {
                 <div class="np-artist">${artist}</div>
                 <div class="np-album">${album}</div>
             </div>
-            <div class="np-progress-container">
+
+            <div class="np-progress-container" style="display: ${state.showVolume ? 'none' : 'block'}">
                 <div class="np-progress-bar">
                     <div class="np-progress-fill" style="width: ${progressPercent}%"></div>
                 </div>
@@ -270,6 +274,14 @@ function renderNowPlaying(animateDir = null) {
                     <span>${formatTime(state.position)}</span>
                     <span>-${formatTime(state.duration - state.position)}</span>
                 </div>
+            </div>
+
+            <div class="np-volume-container" style="display: ${state.showVolume ? 'flex' : 'none'}">
+                <div class="np-volume-icon">🔉</div>
+                <div class="np-volume-bar-wrapper">
+                    <div class="np-volume-fill" style="width: ${state.volume * 100}%"></div>
+                </div>
+                <div class="np-volume-icon">🔊</div>
             </div>
         </div>
     `;
@@ -321,8 +333,18 @@ function handleScroll(direction) {
                 if (newVolume < 0) newVolume = 0;
 
                 state.player.setVolume(newVolume).then(() => {
-                    // Update a local state to visually represent volume if needed later
+                    state.volume = newVolume;
+                    state.showVolume = true;
+                    renderNowPlaying(); // Re-render to show volume bar
                     vibrate(5);
+
+                    if (volumeTimeout) clearTimeout(volumeTimeout);
+                    volumeTimeout = setTimeout(() => {
+                        state.showVolume = false;
+                        if (state.currentMenu === 'now_playing') {
+                            renderNowPlaying();
+                        }
+                    }, 2000);
                 });
             });
         }
@@ -463,10 +485,10 @@ async function loadData() {
         menus.playlists.items = [{ label: 'No Playlists', type: 'none' }];
     }
 
-    // Load Artists (Top Artists)
-    const artistsData = await fetchSpotifyAPI('/me/top/artists?limit=20');
-    if (artistsData && artistsData.items) {
-        menus.artists.items = artistsData.items.map(a => ({
+    // Load Artists (Followed Artists)
+    const artistsData = await fetchSpotifyAPI('/me/following?type=artist&limit=50');
+    if (artistsData && artistsData.artists && artistsData.artists.items) {
+        menus.artists.items = artistsData.artists.items.map(a => ({
             label: a.name,
             type: 'artist_folder',
             uri: a.uri,
@@ -486,6 +508,11 @@ async function loadData() {
         }));
         // Store all URIs for playing in context
         menus.songs.uris = songsData.items.map(t => t.track.uri);
+
+        // Start background loading for the rest of the tracks
+        if (songsData.total > 50) {
+            loadRemainingSongsBackground(songsData.total);
+        }
     } else {
         menus.songs.items = [{ label: 'No Songs', type: 'none' }];
     }
@@ -493,6 +520,48 @@ async function loadData() {
     // If currently on one of these menus, re-render
     if (['playlists', 'artists', 'songs'].includes(state.currentMenu)) {
         renderMenu(state.currentMenu);
+    }
+}
+
+async function loadRemainingSongsBackground(totalTracks) {
+    let offset = 50;
+    while (offset < totalTracks) {
+        try {
+            const data = await fetchSpotifyAPI(`/me/tracks?limit=50&offset=${offset}`);
+            if (data && data.items && data.items.length > 0) {
+                const newItems = data.items.map(t => ({
+                    label: t.track.name,
+                    type: 'track',
+                    uri: t.track.uri
+                }));
+                const newUris = data.items.map(t => t.track.uri);
+
+                menus.songs.items = [...menus.songs.items, ...newItems];
+                menus.songs.uris = [...menus.songs.uris, ...newUris];
+
+                // If the user is currently on the songs menu, re-render it to show new tracks
+                // We shouldn't interrupt their scrolling too much, but updateActiveItem or renderMenu handles it.
+                // However, renderMenu resets the view. To be safe, we only append to the array.
+                // If they are on the menu, we might need a non-destructive re-render or let them scroll.
+                // For simplicity, just update the data model. Next time they enter, it's there.
+                // If they are in the menu currently, rendering again might reset their scroll position.
+                // So we only update the data object in background.
+                if (state.currentMenu === 'songs') {
+                    // We can optionally refresh, but to avoid resetting scroll position on old iPod,
+                    // we will just let it be. If they scroll past the old limit, we'd need to re-render.
+                    // For now, let's trigger a soft re-render if they are at the bottom, or just re-render.
+                    // A quick re-render:
+                    const oldIndex = state.selectedIndex;
+                    renderMenu('songs');
+                    state.selectedIndex = oldIndex;
+                    updateActiveItem();
+                }
+            }
+            offset += 50;
+        } catch (e) {
+            console.error("Error loading background songs", e);
+            break; // stop on error
+        }
     }
 }
 
@@ -505,16 +574,21 @@ async function loadPlaylistTracks(playlistId, title) {
     renderMenu(menuId, 'right');
 
     const data = await fetchSpotifyAPI(`/playlists/${playlistId}/tracks?limit=50`);
-    if (data && data.items) {
+    if (data && data.items && data.items.length > 0) {
         // Filter out null tracks (sometimes happens with local files in playlists)
         const validItems = data.items.filter(t => t.track && t.track.uri);
-        menus[menuId].items = validItems.map(t => ({
-            label: t.track.name,
-            type: 'track',
-            uri: t.track.uri,
-            context_uri: `spotify:playlist:${playlistId}`
-        }));
-        menus[menuId].uris = validItems.map(t => t.track.uri);
+
+        if (validItems.length > 0) {
+            menus[menuId].items = validItems.map(t => ({
+                label: t.track.name,
+                type: 'track',
+                uri: t.track.uri,
+                context_uri: `spotify:playlist:${playlistId}`
+            }));
+            menus[menuId].uris = validItems.map(t => t.track.uri);
+        } else {
+            menus[menuId].items = [{ label: 'No playable tracks', type: 'none' }];
+        }
     } else {
         menus[menuId].items = [{ label: 'No tracks', type: 'none' }];
     }
@@ -531,7 +605,7 @@ async function loadArtistTracks(artistId, title) {
     renderMenu(menuId, 'right');
 
     const data = await fetchSpotifyAPI(`/artists/${artistId}/top-tracks?market=from_token`);
-    if (data && data.tracks) {
+    if (data && data.tracks && data.tracks.length > 0) {
         menus[menuId].items = data.tracks.map(t => ({
             label: t.name,
             type: 'track',

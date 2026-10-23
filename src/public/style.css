@@ -375,3 +375,32 @@ body {
     height: 100%;
     background-color: var(--screen-bg);
 }
+
+
+.np-volume-container {
+    margin-top: auto;
+    width: 100%;
+    display: none;
+    align-items: center;
+}
+
+.np-volume-icon {
+    font-size: 14px;
+    font-weight: bold;
+    margin-right: 5px;
+    margin-left: 5px;
+}
+
+.np-volume-bar-wrapper {
+    flex: 1;
+    height: 12px;
+    border: 2px solid var(--screen-text);
+    padding: 1px;
+    display: flex;
+}
+
+.np-volume-fill {
+    height: 100%;
+    background-color: var(--screen-text);
+    width: 0%;
+}
