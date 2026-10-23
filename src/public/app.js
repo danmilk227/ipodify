@@ -255,7 +255,7 @@ function renderNowPlaying(animateDir = null) {
     const html = `
         <div class="now-playing">
             <div class="np-header">
-                <span>${state.selectedIndex + 1} of 1</span>
+                <span>Now Playing</span>
             </div>
             <div class="np-info">
                 <div class="np-title">${title}</div>
@@ -312,7 +312,22 @@ function updateActiveItem() {
 }
 
 function handleScroll(direction) {
-    if (state.currentMenu === 'now_playing') return;
+    if (state.currentMenu === 'now_playing') {
+        if (state.player) {
+            // Adjust volume. Spotify volume is 0.0 to 1.0
+            state.player.getVolume().then(volume => {
+                let newVolume = volume + (direction * 0.05); // change by 5% per tick
+                if (newVolume > 1) newVolume = 1;
+                if (newVolume < 0) newVolume = 0;
+
+                state.player.setVolume(newVolume).then(() => {
+                    // Update a local state to visually represent volume if needed later
+                    vibrate(5);
+                });
+            });
+        }
+        return;
+    }
 
     const menu = menus[state.currentMenu];
     if (!menu || !menu.items || menu.items.length === 0) return;
@@ -440,8 +455,9 @@ async function loadData() {
     if (playlistsData && playlistsData.items) {
         menus.playlists.items = playlistsData.items.map(p => ({
             label: p.name,
-            type: 'playlist',
-            uri: p.uri
+            type: 'playlist_folder',
+            uri: p.uri,
+            id: p.id
         }));
     } else {
         menus.playlists.items = [{ label: 'No Playlists', type: 'none' }];
@@ -452,8 +468,9 @@ async function loadData() {
     if (artistsData && artistsData.items) {
         menus.artists.items = artistsData.items.map(a => ({
             label: a.name,
-            type: 'artist',
-            uri: a.uri
+            type: 'artist_folder',
+            uri: a.uri,
+            id: a.id
         }));
     } else {
         menus.artists.items = [{ label: 'No Artists', type: 'none' }];
@@ -467,6 +484,8 @@ async function loadData() {
             type: 'track',
             uri: t.track.uri
         }));
+        // Store all URIs for playing in context
+        menus.songs.uris = songsData.items.map(t => t.track.uri);
     } else {
         menus.songs.items = [{ label: 'No Songs', type: 'none' }];
     }
@@ -477,12 +496,82 @@ async function loadData() {
     }
 }
 
-async function playContext(uri) {
+async function loadPlaylistTracks(playlistId, title) {
+    const menuId = `playlist_${playlistId}`;
+    menus[menuId] = { title: title, items: [{ label: 'Loading...', type: 'none' }] };
+
+    state.menuStack.push({ id: state.currentMenu, index: state.selectedIndex });
+    state.selectedIndex = 0;
+    renderMenu(menuId, 'right');
+
+    const data = await fetchSpotifyAPI(`/playlists/${playlistId}/tracks?limit=50`);
+    if (data && data.items) {
+        // Filter out null tracks (sometimes happens with local files in playlists)
+        const validItems = data.items.filter(t => t.track && t.track.uri);
+        menus[menuId].items = validItems.map(t => ({
+            label: t.track.name,
+            type: 'track',
+            uri: t.track.uri,
+            context_uri: `spotify:playlist:${playlistId}`
+        }));
+        menus[menuId].uris = validItems.map(t => t.track.uri);
+    } else {
+        menus[menuId].items = [{ label: 'No tracks', type: 'none' }];
+    }
+
+    if (state.currentMenu === menuId) renderMenu(menuId);
+}
+
+async function loadArtistTracks(artistId, title) {
+    const menuId = `artist_${artistId}`;
+    menus[menuId] = { title: title, items: [{ label: 'Loading...', type: 'none' }] };
+
+    state.menuStack.push({ id: state.currentMenu, index: state.selectedIndex });
+    state.selectedIndex = 0;
+    renderMenu(menuId, 'right');
+
+    const data = await fetchSpotifyAPI(`/artists/${artistId}/top-tracks?market=from_token`);
+    if (data && data.tracks) {
+        menus[menuId].items = data.tracks.map(t => ({
+            label: t.name,
+            type: 'track',
+            uri: t.uri,
+            context_uri: `spotify:artist:${artistId}`
+        }));
+        menus[menuId].uris = data.tracks.map(t => t.uri);
+    } else {
+        menus[menuId].items = [{ label: 'No tracks', type: 'none' }];
+    }
+
+    if (state.currentMenu === menuId) renderMenu(menuId);
+}
+
+
+async function playContext(uri, contextUri = null, allUris = null) {
     if (!state.accessToken || !state.deviceId) return;
 
     try {
-        const isTrack = uri.includes(':track:');
-        const body = isTrack ? { uris: [uri] } : { context_uri: uri };
+        let body = {};
+
+        if (contextUri) {
+            // Play from a specific context (like a playlist or artist) and start at the track
+            body = {
+                context_uri: contextUri,
+                offset: { uri: uri }
+            };
+        } else if (allUris && allUris.length > 0) {
+            // Play a flat list of URIs (like the saved "Songs" list) so prev/next works
+            // Find the index of the clicked track to start there
+            const trackIndex = allUris.indexOf(uri);
+            // Spotify API allows max 385 uris in the array, 50 is fine.
+            body = {
+                uris: allUris,
+                offset: { position: trackIndex !== -1 ? trackIndex : 0 }
+            };
+        } else {
+            // Fallback for single track
+            body = { uris: [uri] };
+        }
 
         await fetch(`https://api.spotify.com/v1/me/player/play?device_id=${state.deviceId}`, {
             method: 'PUT',
@@ -502,7 +591,7 @@ async function playContext(uri) {
     }
 }
 
-// Modify handleSelect to support playing contexts
+// Modify handleSelect to support nested menus and playing contexts
 const originalHandleSelect = handleSelect;
 handleSelect = function() {
     if (state.currentMenu === 'now_playing') {
@@ -515,8 +604,13 @@ handleSelect = function() {
 
     const item = menu.items[state.selectedIndex];
 
-    if (['playlist', 'artist', 'track'].includes(item.type)) {
-        playContext(item.uri);
+    if (item.type === 'playlist_folder') {
+        loadPlaylistTracks(item.id, item.label);
+    } else if (item.type === 'artist_folder') {
+        loadArtistTracks(item.id, item.label);
+    } else if (item.type === 'track') {
+        // Pass the context or the full list of URIs in this menu to enable prev/next skipping
+        playContext(item.uri, item.context_uri, menu.uris);
     } else {
         originalHandleSelect(); // Call original for navigation
     }
