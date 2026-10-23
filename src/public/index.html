@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>iPodify</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div class="ipod-container">
+        <div class="ipod">
+            <!-- Screen Area -->
+            <div class="screen-bezel">
+                <div class="screen" id="screen">
+                    <div class="status-bar">
+                        <span id="status-title">iPod</span>
+                        <div class="battery-icon">
+                            <div class="battery-level"></div>
+                        </div>
+                    </div>
+
+                    <div class="screen-content" id="screen-content">
+                        <!-- Content will be injected here -->
+                    </div>
+                </div>
+            </div>
+
+            <!-- Click Wheel Area -->
+            <div class="wheel-container">
+                <div class="click-wheel" id="click-wheel">
+                    <div class="wheel-button menu-btn" id="btn-menu">MENU</div>
+                    <div class="wheel-button prev-btn" id="btn-prev">
+                        <svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor" xmlns="http://www.w3.org/2000/svg"><path d="M6 6h2v12H6zm3.5 6l8.5 6V6z"/></svg>
+                    </div>
+                    <div class="wheel-button next-btn" id="btn-next">
+                        <svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor" xmlns="http://www.w3.org/2000/svg"><path d="M6 18l8.5-6L6 6v12zM16 6v12h2V6h-2z"/></svg>
+                    </div>
+                    <div class="wheel-button play-pause-btn" id="btn-play-pause">
+                        <svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor" xmlns="http://www.w3.org/2000/svg"><path d="M8 5v14l11-7z"/></svg>
+                    </div>
+
+                    <div class="center-button" id="btn-center"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Web Playback SDK -->
+    <script src="https://sdk.scdn.co/spotify-player.js"></script>
+    <script src="app.js"></script>
+</body>
+</html>
