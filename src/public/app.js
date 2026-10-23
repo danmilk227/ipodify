@@ -31,6 +31,8 @@ function vibrate(duration = 10) {
 }
 
 // --- Click Wheel Logic ---
+// Used to differentiate between a tap and a drag
+let totalDragAngle = 0;
 let isDragging = false;
 let startAngle = 0;
 let lastAngle = 0;
@@ -48,7 +50,9 @@ function getAngle(x, y) {
 }
 
 function handleStart(e) {
-    // Ignore clicks on center button or specific buttons for dragging
+    totalDragAngle = 0; // Reset drag amount on every touch start
+
+    // We don't ignore buttons anymore so dragging can start anywhere on the wheel
     if (e.target.id === 'btn-center') return;
 
     isDragging = true;
@@ -58,7 +62,7 @@ function handleStart(e) {
     lastAngle = startAngle;
     angleAccumulator = 0;
 
-    e.preventDefault(); // Prevent scrolling
+    // We don't preventDefault here to allow clicks to register naturally if not dragging
 }
 
 function handleMove(e) {
@@ -75,6 +79,7 @@ function handleMove(e) {
     if (deltaAngle < -180) deltaAngle += 360;
 
     angleAccumulator += deltaAngle;
+    totalDragAngle += Math.abs(deltaAngle); // Track total movement distance
 
     if (Math.abs(angleAccumulator) >= ANGLE_THRESHOLD) {
         const ticks = Math.trunc(angleAccumulator / ANGLE_THRESHOLD);
@@ -91,7 +96,11 @@ function handleMove(e) {
     }
 
     lastAngle = currentAngle;
-    e.preventDefault();
+
+    // If we've dragged significantly, prevent default to stop scrolling the page/clicking
+    if (totalDragAngle > 5) {
+        if (e.cancelable) e.preventDefault();
+    }
 }
 
 function handleEnd() {
@@ -103,7 +112,7 @@ wheel.addEventListener('mousedown', handleStart);
 document.addEventListener('mousemove', handleMove);
 document.addEventListener('mouseup', handleEnd);
 
-wheel.addEventListener('touchstart', handleStart, { passive: false });
+wheel.addEventListener('touchstart', handleStart, { passive: true });
 wheel.addEventListener('touchmove', handleMove, { passive: false });
 wheel.addEventListener('touchend', handleEnd);
 
@@ -111,38 +120,15 @@ wheel.addEventListener('touchend', handleEnd);
 
 // Helper to detect if click is exactly on a button or its area
 function setupButton(element, callback) {
-    // We use a combination of touch and click to ensure mobile responsiveness
-    // while preventing the drag logic from stealing the event
-    let touchStartedOnButton = false;
+    element.addEventListener('click', (e) => {
+        // If the user rotated the wheel, cancel the button click
+        if (totalDragAngle > 5) {
+            return;
+        }
 
-    const execute = (e) => {
         vibrate(20);
         callback();
-        e.preventDefault();
         e.stopPropagation();
-    };
-
-    element.addEventListener('mousedown', (e) => {
-        e.stopPropagation(); // Stop wheel drag from starting
-    });
-
-    element.addEventListener('touchstart', (e) => {
-        touchStartedOnButton = true;
-        e.stopPropagation(); // Stop wheel drag from starting
-    }, { passive: false });
-
-    element.addEventListener('touchend', (e) => {
-        if (touchStartedOnButton) {
-            touchStartedOnButton = false;
-            execute(e);
-        }
-    }, { passive: false });
-
-    element.addEventListener('click', (e) => {
-        // Fallback for desktop clicks
-        if (!touchStartedOnButton) {
-            execute(e);
-        }
     });
 }
 
