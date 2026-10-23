@@ -111,12 +111,38 @@ wheel.addEventListener('touchend', handleEnd);
 
 // Helper to detect if click is exactly on a button or its area
 function setupButton(element, callback) {
-    element.addEventListener('click', (e) => {
-        if (!isDragging) {
-            vibrate(20);
-            callback();
-        }
+    // We use a combination of touch and click to ensure mobile responsiveness
+    // while preventing the drag logic from stealing the event
+    let touchStartedOnButton = false;
+
+    const execute = (e) => {
+        vibrate(20);
+        callback();
+        e.preventDefault();
         e.stopPropagation();
+    };
+
+    element.addEventListener('mousedown', (e) => {
+        e.stopPropagation(); // Stop wheel drag from starting
+    });
+
+    element.addEventListener('touchstart', (e) => {
+        touchStartedOnButton = true;
+        e.stopPropagation(); // Stop wheel drag from starting
+    }, { passive: false });
+
+    element.addEventListener('touchend', (e) => {
+        if (touchStartedOnButton) {
+            touchStartedOnButton = false;
+            execute(e);
+        }
+    }, { passive: false });
+
+    element.addEventListener('click', (e) => {
+        // Fallback for desktop clicks
+        if (!touchStartedOnButton) {
+            execute(e);
+        }
     });
 }
 
