@@ -89,18 +89,28 @@ sudo apt update
 sudo apt install nginx certbot python3-certbot-nginx
 ```
 
-Создайте конфигурацию Nginx (замените `ВАШ_IP` на реальный IP вашего сервера, например `123.45.67.89`):
+Если у вас на сервере порты 80/443 уже заняты другим приложением (например, Python Uvicorn/FastAPI), вы можете настроить Nginx на прослушивание другого порта для HTTPS, например `2026`. (При этом бэкенд Node.js должен работать на внутреннем порту, например `3000`).
+
+Сначала получите сертификат в автономном режиме (если 80 порт свободен) или временно остановите другое приложение:
+```bash
+sudo certbot certonly --standalone -d ВАШ_IP.nip.io
+```
+
+Создайте конфигурацию Nginx:
 ```bash
 sudo nano /etc/nginx/sites-available/ipodify
 ```
-Вставьте конфигурацию:
+Вставьте конфигурацию (замените `ВАШ_IP` на ваш реальный IP):
 ```nginx
 server {
-    listen 80;
+    listen 2026 ssl; # Слушаем нестандартный порт для HTTPS
     server_name ВАШ_IP.nip.io;
 
+    ssl_certificate /etc/letsencrypt/live/ВАШ_IP.nip.io/fullchain.pem;
+    ssl_certificate_key /etc/letsencrypt/live/ВАШ_IP.nip.io/privkey.pem;
+
     location / {
-        proxy_pass http://localhost:3000;
+        proxy_pass http://localhost:3000; # Порт, на котором работает Node.js
         proxy_http_version 1.1;
         proxy_set_header Upgrade $http_upgrade;
         proxy_set_header Connection 'upgrade';
@@ -115,14 +125,10 @@ sudo ln -s /etc/nginx/sites-available/ipodify /etc/nginx/sites-enabled/
 sudo nginx -t
 sudo systemctl reload nginx
 ```
-Выпустите SSL-сертификат (снова замените `ВАШ_IP` на ваш IP сервера):
-```bash
-sudo certbot --nginx -d ВАШ_IP.nip.io
-```
 
-**Важно!** Не забудьте указать именно этот новый адрес `https://ВАШ_IP.nip.io/callback` в настройках приложения Spotify (раздел Redirect URIs) и в вашем файле `.env`!
+**Важно!** Не забудьте указать именно этот новый адрес `https://ВАШ_IP.nip.io:2026/callback` (вместе с портом) в настройках приложения Spotify (раздел Redirect URIs) и в вашем файле `.env`!
 
-Готово! Теперь вы можете зайти на `https://ВАШ_IP.nip.io` и использовать ваш iPodify.
+Готово! Теперь вы можете зайти на `https://ВАШ_IP.nip.io:2026` и использовать ваш iPodify.
 
 ---
 **Важно**: Для воспроизведения музыки не забудьте, что текущее устройство (браузер) должно быть активно, и иногда, чтобы начать играть, требуется нажать кнопку `Play/Pause` или запустить трек через официальное приложение Spotify, выбрав устройство `iPodify Web Player`.
