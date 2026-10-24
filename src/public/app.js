@@ -4,7 +4,22 @@ const savedPrefs = JSON.parse(localStorage.getItem('ipodify_prefs') || '{}');
 // Available Themes from /themes/registry.js
 const availableThemes = (Array.isArray(window.IPODIFY_THEMES) && window.IPODIFY_THEMES.length > 0)
     ? window.IPODIFY_THEMES
-    : [{ id: 'classic', name: 'Classic 1G', css: null }];
+    : [{ id: 'classic', name: 'Classic 1G', layout: '/themes/classic/layout.html', css: null }];
+
+// Clean Vector SVG Icons (No Emojis)
+const ICONS = {
+    play: `<svg width="10" height="10" viewBox="0 0 12 12" fill="currentColor" style="display:block"><path d="M2.5 1.5v9l8-4.5-8-4.5z"/></svg>`,
+    pause: `<svg width="10" height="10" viewBox="0 0 12 12" fill="currentColor" style="display:block"><path d="M2.5 1.5h2.5v9H2.5v-9zm4.5 0h2.5v9H7v-9z"/></svg>`,
+    lock: `<svg width="10" height="10" viewBox="0 0 12 12" fill="currentColor" style="display:block"><path d="M3.5 5V3.8a2.5 2.5 0 0 1 5 0V5h.8c.4 0 .7.3.7.7v4.6c0 .4-.3.7-.7.7H2.7a.7.7 0 0 1-.7-.7V5.7c0-.4.3-.7.7-.7h.8zm1.2 0h2.6V3.8a1.3 1.3 0 0 0-2.6 0V5z"/></svg>`,
+    bolt: `<svg width="8" height="10" viewBox="0 0 10 12" fill="currentColor" style="display:inline-block; vertical-align:middle; margin-right:1px"><path d="M6 0L1 7h3.5L3.5 12 9 5H5.5L6 0z"/></svg>`,
+    shuffle: `<svg width="12" height="11" viewBox="0 0 16 14" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2h3v3M1 3h2.5c2.2 0 3.5 2 5 4s2.8 4 5 4H15m-3 2h3v-3M1 11h2.5c1.2 0 2.1-.7 3-1.8M15 2l-4.5 4.2"/></svg>`,
+    repeatAll: `<svg width="12" height="11" viewBox="0 0 16 14" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M11 1l2 2-2 2"/><path d="M2 7V5a2 2 0 0 1 2-2h9M5 13l-2-2 2-2"/><path d="M14 7v2a2 2 0 0 1-2 2H3"/></svg>`,
+    repeatOne: `<svg width="13" height="11" viewBox="0 0 16 14" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M11 1l2 2-2 2"/><path d="M2 7V5a2 2 0 0 1 2-2h9M5 13l-2-2 2-2"/><path d="M14 7v2a2 2 0 0 1-2 2H3"/><path d="M8 5.2v3.6"/></svg>`,
+    volumeLow: `<svg width="14" height="14" viewBox="0 0 16 16" fill="currentColor"><path d="M2 6h3l4-3.5v11L5 10H2V6z"/></svg>`,
+    volumeHigh: `<svg width="14" height="14" viewBox="0 0 16 16" fill="currentColor"><path d="M1 6h3l4-3.5v11L4 10H1V6zm9.5-1.5a4.5 4.5 0 0 1 0 7l-.8-.9a3.3 3.3 0 0 0 0-5.2l.8-.9zm2-2a7.2 7.2 0 0 1 0 11l-.8-.9a6 6 0 0 0 0-9.2l.8-.9z"/></svg>`,
+    timer: `<svg width="11" height="11" viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.6"><circle cx="7" cy="7.5" r="5"/><path d="M7 5v3l2 1.2M5.2 1h3.6"/></svg>`,
+    musicNote: `<svg width="32" height="32" viewBox="0 0 24 24" fill="currentColor" opacity="0.45"><path d="M12 3v10.55c-.59-.34-1.27-.55-2-.55-2.21 0-4 1.79-4 4s1.79 4 4 4 4-1.79 4-4V7h4V3h-6z"/></svg>`
+};
 
 // State
 const state = {
@@ -45,6 +60,7 @@ let sleepTimerTimeout = null;
 let clockInterval = null;
 let audioCtx = null;
 let deferredInstallPrompt = null;
+const layoutCache = {};
 
 function savePreferences() {
     localStorage.setItem('ipodify_prefs', JSON.stringify({
@@ -55,30 +71,26 @@ function savePreferences() {
     }));
 }
 
-// DOM Elements
-const screenEl = document.getElementById('screen');
-const screenContent = document.getElementById('screen-content');
-const statusTitle = document.getElementById('status-title');
-const statusPlayIcon = document.getElementById('status-play-icon');
-const statusLockIcon = document.getElementById('status-lock-icon');
-const batteryTextEl = document.getElementById('battery-text');
-const batteryLevelEl = document.getElementById('battery-level');
-const holdSwitchEl = document.getElementById('hold-switch');
-const wheel = document.getElementById('click-wheel');
-const btnCenter = document.getElementById('btn-center');
-const btnMenu = document.getElementById('btn-menu');
-const btnPrev = document.getElementById('btn-prev');
-const btnNext = document.getElementById('btn-next');
-const btnPlayPause = document.getElementById('btn-play-pause');
+// Dynamic DOM References (re-bound when theme layout.html changes)
+let screenEl = null;
+let screenContent = null;
+let statusTitle = null;
+let statusPlayIcon = null;
+let statusLockIcon = null;
+let batteryTextEl = null;
+let batteryLevelEl = null;
+let holdSwitchEl = null;
+let wheel = null;
+let btnCenter = null;
+let btnMenu = null;
+let btnPrev = null;
+let btnNext = null;
+let btnPlayPause = null;
+let ambientArtworkEl = null;
 const themeLinkEl = document.getElementById('dynamic-theme-css');
-const ambientStageEl = document.getElementById('ambient-stage');
-const ambientArtworkEl = document.getElementById('ambient-artwork');
+const themeMountEl = document.getElementById('theme-mount');
 
-if (state.backlight) {
-    screenEl.classList.add('backlight-on');
-}
-
-// --- Theme Engine ---
+// --- Theme Engine with Custom HTML Layouts ---
 function getCurrentThemeObj() {
     return availableThemes.find(t => t.id === state.theme) || availableThemes[0];
 }
@@ -93,14 +105,65 @@ function getTrackArtworkUrl(track) {
 function updateAmbientArtwork() {
     if (!ambientArtworkEl) return;
     const artUrl = getTrackArtworkUrl(state.currentTrack);
-    if (artUrl && state.theme !== 'classic') {
-        ambientArtworkEl.style.backgroundImage = `url("${artUrl}")`;
-    } else {
-        ambientArtworkEl.style.backgroundImage = 'none';
-    }
+    ambientArtworkEl.style.backgroundImage = artUrl ? `url("${artUrl}")` : 'none';
 }
 
-function applyTheme(themeId) {
+function bindLayoutDOM() {
+    screenEl = document.getElementById('screen');
+    screenContent = document.getElementById('screen-content');
+    statusTitle = document.getElementById('status-title');
+    statusPlayIcon = document.getElementById('status-play-icon');
+    statusLockIcon = document.getElementById('status-lock-icon');
+    batteryTextEl = document.getElementById('battery-text');
+    batteryLevelEl = document.getElementById('battery-level');
+    holdSwitchEl = document.getElementById('hold-switch');
+    wheel = document.getElementById('click-wheel');
+    btnCenter = document.getElementById('btn-center');
+    btnMenu = document.getElementById('btn-menu');
+    btnPrev = document.getElementById('btn-prev');
+    btnNext = document.getElementById('btn-next');
+    btnPlayPause = document.getElementById('btn-play-pause');
+    ambientArtworkEl = document.getElementById('ambient-artwork');
+
+    if (screenEl) {
+        screenEl.classList.toggle('backlight-on', state.backlight);
+    }
+
+    if (holdSwitchEl) {
+        holdSwitchEl.classList.toggle('active', state.isHoldLocked);
+        holdSwitchEl.addEventListener('click', () => {
+            state.isHoldLocked = !state.isHoldLocked;
+            holdSwitchEl.classList.toggle('active', state.isHoldLocked);
+            if (statusLockIcon) {
+                statusLockIcon.innerHTML = state.isHoldLocked ? ICONS.lock : '';
+            }
+            playPiezoClick(true);
+        });
+    }
+
+    if (statusLockIcon) {
+        statusLockIcon.innerHTML = state.isHoldLocked ? ICONS.lock : '';
+    }
+
+    if (wheel) {
+        wheel.addEventListener('mousedown', handleStart);
+        wheel.addEventListener('touchstart', handleStart, { passive: false });
+        wheel.addEventListener('touchmove', handleMove, { passive: false });
+        wheel.addEventListener('touchend', handleEnd);
+    }
+
+    if (btnCenter) setupButton(btnCenter, () => handleSelect());
+    if (btnMenu) setupButton(btnMenu, () => handleMenuBack());
+    if (btnPrev) setupButton(btnPrev, () => { if (state.player) state.player.previousTrack(); });
+    if (btnNext) setupButton(btnNext, () => { if (state.player) state.player.nextTrack(); });
+    if (btnPlayPause) setupButton(btnPlayPause, () => { if (state.player) state.player.togglePlay(); });
+
+    updateBatteryUI();
+    updateStatusPlayIcon();
+    updateAmbientArtwork();
+}
+
+async function applyTheme(themeId) {
     const themeObj = availableThemes.find(t => t.id === themeId) || availableThemes[0];
     state.theme = themeObj.id;
     document.body.setAttribute('data-theme', themeObj.id);
@@ -109,21 +172,40 @@ function applyTheme(themeId) {
         themeLinkEl.setAttribute('href', themeObj.css || '');
     }
 
-    if (ambientStageEl) {
-        ambientStageEl.style.display = themeObj.id === 'classic' ? 'none' : 'block';
+    let layoutHTML = layoutCache[themeObj.id];
+    if (!layoutHTML && themeObj.layout) {
+        try {
+            const res = await fetch(themeObj.layout);
+            if (res.ok) {
+                layoutHTML = await res.text();
+                layoutCache[themeObj.id] = layoutHTML;
+            }
+        } catch (e) {
+            console.error('Failed to load theme layout:', e);
+        }
     }
 
-    updateAmbientArtwork();
+    if (themeMountEl && layoutHTML) {
+        themeMountEl.innerHTML = layoutHTML;
+    }
+
+    bindLayoutDOM();
     savePreferences();
+
+    if (state.currentMenu) {
+        if (state.currentMenu === 'now_playing') renderNowPlaying();
+        else if (state.currentMenu === 'about') renderAbout();
+        else if (state.currentMenu === 'clock_view') renderClockView();
+        else if (state.currentMenu === 'brick_game') startBrickGame();
+        else renderMenu(state.currentMenu);
+    }
 }
 
-function cycleThemeState() {
+async function cycleThemeState() {
     const currentIndex = availableThemes.findIndex(t => t.id === state.theme);
     const nextIndex = (currentIndex + 1) % availableThemes.length;
-    applyTheme(availableThemes[nextIndex].id);
+    await applyTheme(availableThemes[nextIndex].id);
 }
-
-applyTheme(state.theme);
 
 // --- PWA Service Worker & Install Prompt ---
 if ('serviceWorker' in navigator) {
@@ -143,15 +225,15 @@ window.addEventListener('appinstalled', () => {
     if (state.currentMenu === 'settings') renderMenu('settings');
 });
 
-// --- Real Battery Status API ---
+// --- Real Battery Status API (No Emojis) ---
 function updateBatteryUI() {
     if (batteryLevelEl) {
         batteryLevelEl.style.width = `${Math.max(5, state.batteryLevel)}%`;
     }
     if (batteryTextEl) {
-        const bolt = state.batteryCharging ? '⚡' : '';
+        const bolt = state.batteryCharging ? ICONS.bolt : '';
         const pct = state.showBatteryPercent ? `${state.batteryLevel}%` : '';
-        batteryTextEl.innerText = `${bolt}${pct}`;
+        batteryTextEl.innerHTML = `${bolt}${pct}`;
     }
 }
 
@@ -170,19 +252,6 @@ async function initBatteryMonitor() {
             battery.addEventListener('chargingchange', syncBattery);
         } catch (_) {}
     }
-}
-initBatteryMonitor();
-
-// --- Hold Switch (Hardware Lock) ---
-if (holdSwitchEl) {
-    holdSwitchEl.addEventListener('click', () => {
-        state.isHoldLocked = !state.isHoldLocked;
-        holdSwitchEl.classList.toggle('active', state.isHoldLocked);
-        if (statusLockIcon) {
-            statusLockIcon.innerText = state.isHoldLocked ? '🔒' : '';
-        }
-        playPiezoClick(true);
-    });
 }
 
 // --- Authentic 1st Gen Piezo Clicker (No Vibration) ---
@@ -238,6 +307,7 @@ let angleAccumulator = 0;
 const ANGLE_THRESHOLD = 14;
 
 function getAngle(x, y) {
+    if (!wheel) return 0;
     const rect = wheel.getBoundingClientRect();
     const centerX = rect.left + rect.width / 2;
     const centerY = rect.top + rect.height / 2;
@@ -302,13 +372,8 @@ function handleEnd() {
     isDragging = false;
 }
 
-wheel.addEventListener('mousedown', handleStart);
 document.addEventListener('mousemove', handleMove);
 document.addEventListener('mouseup', handleEnd);
-
-wheel.addEventListener('touchstart', handleStart, { passive: false });
-wheel.addEventListener('touchmove', handleMove, { passive: false });
-wheel.addEventListener('touchend', handleEnd);
 
 // --- Button Clicks & Keyboard Support ---
 function setupButton(element, callback) {
@@ -322,18 +387,6 @@ function setupButton(element, callback) {
         e.stopPropagation();
     });
 }
-
-setupButton(btnCenter, () => handleSelect());
-setupButton(btnMenu, () => handleMenuBack());
-setupButton(btnPrev, () => {
-    if (state.player) state.player.previousTrack();
-});
-setupButton(btnNext, () => {
-    if (state.player) state.player.nextTrack();
-});
-setupButton(btnPlayPause, () => {
-    if (state.player) state.player.togglePlay();
-});
 
 document.addEventListener('keydown', (e) => {
     unlockAudio();
@@ -456,11 +509,11 @@ const menus = {
 function updateStatusPlayIcon() {
     if (!statusPlayIcon) return;
     if (state.isPlaying) {
-        statusPlayIcon.innerText = '▶';
+        statusPlayIcon.innerHTML = ICONS.play;
     } else if (state.currentTrack) {
-        statusPlayIcon.innerText = '❚❚';
+        statusPlayIcon.innerHTML = ICONS.pause;
     } else {
-        statusPlayIcon.innerText = '';
+        statusPlayIcon.innerHTML = '';
     }
 }
 
@@ -510,12 +563,12 @@ function buildMenuHTML(menu) {
 
 function renderMenu(menuId, animateDir = null) {
     const menu = menus[menuId];
-    if (!menu) return;
+    if (!menu || !screenContent) return;
 
     stopSpecialViews();
     state.currentMenu = menuId;
     state.isScrubbing = false;
-    statusTitle.innerText = menu.title;
+    if (statusTitle) statusTitle.innerText = menu.title;
     updateStatusPlayIcon();
 
     const html = buildMenuHTML(menu);
@@ -534,8 +587,10 @@ function renderMenu(menuId, animateDir = null) {
         screenContent.appendChild(newView);
 
         setTimeout(() => {
-            screenContent.innerHTML = html;
-            updateActiveItem();
+            if (screenContent) {
+                screenContent.innerHTML = html;
+                updateActiveItem();
+            }
         }, 180);
     } else {
         screenContent.innerHTML = html;
@@ -544,9 +599,10 @@ function renderMenu(menuId, animateDir = null) {
 }
 
 function renderAbout(animateDir = null, customMessage = null) {
+    if (!screenContent) return;
     stopSpecialViews();
     state.currentMenu = 'about';
-    statusTitle.innerText = customMessage ? 'Install App' : 'About';
+    if (statusTitle) statusTitle.innerText = customMessage ? 'Install App' : 'About';
 
     const songsCount = state.savedTracksCache.length;
     const playlistsCount = menus.playlists.items.filter(i => i.type === 'playlist_folder').length;
@@ -567,7 +623,7 @@ function renderAbout(animateDir = null, customMessage = null) {
             <div class="about-row"><span>Albums</span><span>${albumsCount}</span></div>
             <div class="about-row"><span>Playlists</span><span>${playlistsCount}</span></div>
             <div class="about-row"><span>Theme</span><span>${getCurrentThemeObj().name}</span></div>
-            <div class="about-row"><span>Version</span><span>1.3 (2026)</span></div>
+            <div class="about-row"><span>Version</span><span>1.4 (2026)</span></div>
         </div>
     `;
 
@@ -585,25 +641,28 @@ function renderAbout(animateDir = null, customMessage = null) {
         screenContent.appendChild(newView);
 
         setTimeout(() => {
-            screenContent.innerHTML = html;
+            if (screenContent) screenContent.innerHTML = html;
         }, 180);
     } else {
         screenContent.innerHTML = html;
     }
 }
 
-// --- Extras: Classic iPod Clock ---
+// --- Extras: Classic iPod Clock (No Emojis) ---
 function renderClockView() {
+    if (!screenContent) return;
     stopSpecialViews();
     state.currentMenu = 'clock_view';
-    statusTitle.innerText = 'Clock';
+    if (statusTitle) statusTitle.innerText = 'Clock';
 
     const updateClockHTML = () => {
-        if (state.currentMenu !== 'clock_view') return;
+        if (state.currentMenu !== 'clock_view' || !screenContent) return;
         const now = new Date();
         const timeStr = now.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', second: '2-digit', hour12: false });
         const dateStr = now.toLocaleDateString([], { weekday: 'short', month: 'short', day: 'numeric', year: 'numeric' });
-        const sleepStr = state.sleepMinutes > 0 ? `<div style="font-size:11px; margin-top:6px;">⏲ Sleep: ${state.sleepMinutes}m</div>` : '';
+        const sleepStr = state.sleepMinutes > 0
+            ? `<div style="font-size:11px; margin-top:6px; display:flex; align-items:center; justify-content:center; gap:4px;">${ICONS.timer}<span>Sleep: ${state.sleepMinutes}m</span></div>`
+            : '';
 
         screenContent.innerHTML = `
             <div class="clock-view">
@@ -662,9 +721,10 @@ function stopBrickGame() {
 }
 
 function startBrickGame() {
+    if (!screenContent) return;
     stopSpecialViews();
     state.currentMenu = 'brick_game';
-    statusTitle.innerText = 'Brick';
+    if (statusTitle) statusTitle.innerText = 'Brick';
 
     screenContent.innerHTML = `<canvas id="brick-canvas" class="brick-canvas" width="280" height="186"></canvas>`;
     const canvas = document.getElementById('brick-canvas');
@@ -681,7 +741,7 @@ function startBrickGame() {
     initBricksArray();
 
     const loop = () => {
-        if (state.currentMenu !== 'brick_game') return;
+        if (state.currentMenu !== 'brick_game' || !screenEl) return;
 
         const fg = getComputedStyle(screenEl).getPropertyValue('--screen-text').trim() || '#1f2623';
         ctx.clearRect(0, 0, canvas.width, canvas.height);
@@ -690,7 +750,6 @@ function startBrickGame() {
         ctx.fillText(`Score: ${brickState.score}`, 8, 12);
         ctx.fillText(`Balls: ${brickState.lives}`, 225, 12);
 
-        // Move ball
         brickState.ballX += brickState.vx;
         brickState.ballY += brickState.vy;
 
@@ -703,7 +762,6 @@ function startBrickGame() {
             playPiezoClick(false);
         }
 
-        // Paddle collision
         const py = canvas.height - 14;
         if (
             brickState.ballY >= py - 3 &&
@@ -717,7 +775,6 @@ function startBrickGame() {
             playPiezoClick(false);
         }
 
-        // Brick collision
         brickState.bricks.forEach(b => {
             if (!b.alive) return;
             if (
@@ -737,7 +794,6 @@ function startBrickGame() {
             initBricksArray();
         }
 
-        // Bottom miss
         if (brickState.ballY > canvas.height) {
             brickState.lives -= 1;
             if (brickState.lives <= 0) {
@@ -750,14 +806,12 @@ function startBrickGame() {
             brickState.vy = -2.2;
         }
 
-        // Draw bricks
         brickState.bricks.forEach(b => {
             if (b.alive) {
                 ctx.fillRect(b.x, b.y, b.w, b.h);
             }
         });
 
-        // Draw paddle & ball
         ctx.fillRect(brickState.paddleX, py, brickState.paddleW, brickState.paddleH);
         ctx.fillRect(brickState.ballX - 3, brickState.ballY - 3, 6, 6);
 
@@ -767,18 +821,20 @@ function startBrickGame() {
     brickAnimFrame = requestAnimationFrame(loop);
 }
 
-// --- Now Playing Screen ---
+// --- Now Playing Screen (Supports Per-Theme HTML Template & Clean SVG Icons) ---
 function renderNowPlaying(animateDir = null) {
+    if (!screenContent) return;
     stopSpecialViews();
     state.currentMenu = 'now_playing';
-    statusTitle.innerText = 'Now Playing';
+    if (statusTitle) statusTitle.innerText = 'Now Playing';
     updateStatusPlayIcon();
 
     const title = state.currentTrack ? state.currentTrack.name : 'Not Playing';
     const artist = state.currentTrack ? state.currentTrack.artists.map(a => a.name).join(', ') : '';
     const album = state.currentTrack ? state.currentTrack.album.name : '';
     const artworkUrl = getTrackArtworkUrl(state.currentTrack);
-    const isLongTitle = title.length > (state.theme === 'classic' ? 24 : 18);
+    const themeObj = getCurrentThemeObj();
+    const isLongTitle = title.length > (themeObj.id === 'classic' ? 24 : 16);
 
     const formatTime = (ms) => {
         const totalSeconds = Math.floor(Math.max(0, ms) / 1000);
@@ -791,54 +847,68 @@ function renderNowPlaying(animateDir = null) {
     const progressPercent = state.duration ? Math.min(100, Math.max(0, (activePos / state.duration) * 100)) : 0;
 
     const trackIndexText = state.currentTrack ? `${state.queueIndex} of ${state.queueTotal}` : '';
-    const shuffleBadge = state.shuffle ? '🔀' : '';
-    const repeatBadge = state.repeatMode === 1 ? '🔁' : (state.repeatMode === 2 ? '🔂' : '');
+    const shuffleIcon = state.shuffle ? ICONS.shuffle : '';
+    const repeatIcon = state.repeatMode === 1 ? ICONS.repeatAll : (state.repeatMode === 2 ? ICONS.repeatOne : '');
 
-    // В теме Classic 1G обложка скрыта (display: none), а в iOS 26 и других новых темах отображается слева от названия
-    const artworkBlockHTML = `
-        <div class="np-artwork-wrap" style="display: none;">
-            ${artworkUrl
-                ? `<img class="np-artwork" src="${artworkUrl}" alt="Cover" />`
-                : `<div class="np-artwork-placeholder">♪</div>`
-            }
-        </div>
-    `;
+    let html = '';
 
-    const html = `
-        <div class="now-playing">
-            <div class="np-header">
-                <span>${trackIndexText}</span>
-                <span class="np-modes">${ state.isScrubbing ? '[Scrub]' : '' } ${shuffleBadge} ${repeatBadge}</span>
-            </div>
-            <div class="np-main-row">
-                ${artworkBlockHTML}
+    if (typeof themeObj.renderNowPlaying === 'function') {
+        html = themeObj.renderNowPlaying({
+            title,
+            artist,
+            album,
+            artworkUrl,
+            isLongTitle,
+            trackIndexText,
+            isScrubbing: state.isScrubbing,
+            showVolume: state.showVolume,
+            progressPercent,
+            volumePercent: state.volume * 100,
+            currentTimeFormatted: formatTime(activePos),
+            remainingTimeFormatted: formatTime(Math.max(0, state.duration - activePos)),
+            shuffleIcon,
+            repeatIcon,
+            icons: ICONS
+        });
+    } else {
+        // Default Classic 1G Now Playing (No Emojis)
+        html = `
+            <div class="now-playing">
+                <div class="np-header">
+                    <span>${trackIndexText}</span>
+                    <span class="np-modes" style="display:inline-flex; align-items:center; gap:5px;">
+                        ${state.isScrubbing ? '[Scrub]' : ''}
+                        ${shuffleIcon}
+                        ${repeatIcon}
+                    </span>
+                </div>
                 <div class="np-info">
                     <div class="np-title ${isLongTitle ? 'marquee' : ''}"><span>${title}</span></div>
                     <div class="np-artist">${artist}</div>
                     <div class="np-album">${album}</div>
                 </div>
-            </div>
 
-            <div class="np-progress-container" style="display: ${state.showVolume ? 'none' : 'block'}">
-                <div class="np-progress-bar">
-                    <div class="np-progress-fill" style="width: ${ state.isScrubbing ? 0 : progressPercent }%"></div>
-                    ${ state.isScrubbing ? `<div class="np-scrub-diamond" style="left: ${progressPercent}%"></div>` : '' }
+                <div class="np-progress-container" style="display: ${state.showVolume ? 'none' : 'block'}">
+                    <div class="np-progress-bar">
+                        <div class="np-progress-fill" style="width: ${state.isScrubbing ? 0 : progressPercent}%"></div>
+                        ${state.isScrubbing ? `<div class="np-scrub-diamond" style="left: ${progressPercent}%"></div>` : ''}
+                    </div>
+                    <div class="np-time">
+                        <span>${formatTime(activePos)}</span>
+                        <span>-${formatTime(Math.max(0, state.duration - activePos))}</span>
+                    </div>
                 </div>
-                <div class="np-time">
-                    <span>${formatTime(activePos)}</span>
-                    <span>-${formatTime(Math.max(0, state.duration - activePos))}</span>
-                </div>
-            </div>
 
-            <div class="np-volume-container" style="display: ${state.showVolume ? 'flex' : 'none'}">
-                <span class="np-vol-icon">🔈</span>
-                <div class="np-volume-bar-wrapper">
-                    <div class="np-volume-fill" style="width: ${state.volume * 100}%"></div>
+                <div class="np-volume-container" style="display: ${state.showVolume ? 'flex' : 'none'}">
+                    <span class="np-vol-icon">${ICONS.volumeLow}</span>
+                    <div class="np-volume-bar-wrapper">
+                        <div class="np-volume-fill" style="width: ${state.volume * 100}%"></div>
+                    </div>
+                    <span class="np-vol-icon">${ICONS.volumeHigh}</span>
                 </div>
-                <span class="np-vol-icon">🔊</span>
             </div>
-        </div>
-    `;
+        `;
+    }
 
     if (animateDir) {
         const oldView = document.createElement('div');
@@ -854,7 +924,7 @@ function renderNowPlaying(animateDir = null) {
         screenContent.appendChild(newView);
 
         setTimeout(() => {
-            screenContent.innerHTML = html;
+            if (screenContent) screenContent.innerHTML = html;
         }, 180);
     } else {
         screenContent.innerHTML = html;
@@ -862,7 +932,7 @@ function renderNowPlaying(animateDir = null) {
 }
 
 function updateActiveItem() {
-    if (['now_playing', 'about', 'clock_view', 'brick_game'].includes(state.currentMenu)) return;
+    if (!screenContent || ['now_playing', 'about', 'clock_view', 'brick_game'].includes(state.currentMenu)) return;
 
     const viewport = screenContent.querySelector('.menu-list-viewport');
     const items = screenContent.querySelectorAll('.menu-item');
@@ -965,7 +1035,7 @@ async function commitScrub() {
 
 function toggleBacklightState() {
     state.backlight = !state.backlight;
-    screenEl.classList.toggle('backlight-on', state.backlight);
+    if (screenEl) screenEl.classList.toggle('backlight-on', state.backlight);
     savePreferences();
 }
 
@@ -1080,7 +1150,6 @@ function handleSelect() {
     } else if (item.type === 'toggle') {
         if (item.action === 'cycleTheme') {
             cycleThemeState();
-            renderMenu(state.currentMenu);
         } else if (item.action === 'toggleClicker') {
             state.clickerEnabled = !state.clickerEnabled;
             savePreferences();
@@ -1345,7 +1414,7 @@ async function loadAlbumTracks(albumId, title, initialTracks = []) {
         menus[menuId].uris = tracks.map(t => t.uri);
     } else {
         menus[menuId].items = [
-            { label: '▶ Play Album', type: 'play_context', context_uri: contextUri, menuId: menuId }
+            { label: 'Play Album', type: 'play_context', context_uri: contextUri, menuId: menuId }
         ];
         menus[menuId].uris = [];
     }
@@ -1443,7 +1512,7 @@ async function loadPlaylistTracks(playlistId, title) {
 
     if (validTracks.length > 0) {
         menus[menuId].items = [
-            { label: '▶ Play Playlist', type: 'play_context', context_uri: contextUri, menuId: menuId },
+            { label: 'Play Playlist', type: 'play_context', context_uri: contextUri, menuId: menuId },
             ...validTracks.map(trackObj => ({
                 label: trackObj.name,
                 type: 'track',
@@ -1457,7 +1526,7 @@ async function loadPlaylistTracks(playlistId, title) {
 
         if (queueTracks.length > 0) {
             menus[menuId].items = [
-                { label: '▶ Play Playlist', type: 'play_context', context_uri: contextUri, menuId: menuId },
+                { label: 'Play Playlist', type: 'play_context', context_uri: contextUri, menuId: menuId },
                 ...queueTracks.map(trackObj => ({
                     label: trackObj.name,
                     type: 'track',
@@ -1468,7 +1537,7 @@ async function loadPlaylistTracks(playlistId, title) {
             menus[menuId].uris = queueTracks.map(t => t.uri);
         } else {
             menus[menuId].items = [
-                { label: '▶ Play & Load Tracks', type: 'play_context', context_uri: contextUri, menuId: menuId }
+                { label: 'Play & Load Tracks', type: 'play_context', context_uri: contextUri, menuId: menuId }
             ];
             menus[menuId].uris = [];
         }
@@ -1542,7 +1611,7 @@ async function loadArtistTracks(artistId, title) {
         menus[menuId].uris = finalTracks.map(t => t.uri);
     } else {
         menus[menuId].items = [
-            { label: '▶ Play Artist Radio', type: 'play_context', context_uri: `spotify:artist:${artistId}`, menuId: menuId }
+            { label: 'Play Artist Radio', type: 'play_context', context_uri: `spotify:artist:${artistId}`, menuId: menuId }
         ];
         menus[menuId].uris = [];
     }
@@ -1616,7 +1685,7 @@ async function playEntireContext(contextUri, menuId = null) {
 
                     if (tracks.length > 0) {
                         menus[menuId].items = [
-                            { label: '▶ Play Playlist', type: 'play_context', context_uri: contextUri, menuId: menuId },
+                            { label: 'Play Playlist', type: 'play_context', context_uri: contextUri, menuId: menuId },
                             ...tracks.map(t => ({
                                 label: t.name,
                                 type: 'track',
@@ -1756,7 +1825,10 @@ function initPlayer() {
     }, 1000);
 }
 
-function checkAuth() {
+async function checkAuth() {
+    await applyTheme(state.theme);
+    initBatteryMonitor();
+
     const hash = window.location.hash.substring(1);
     const params = new URLSearchParams(hash);
     const token = params.get('access_token');
