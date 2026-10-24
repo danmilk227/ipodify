@@ -1,6 +1,11 @@
 // --- Saved Preferences ---
 const savedPrefs = JSON.parse(localStorage.getItem('ipodify_prefs') || '{}');
 
+// Available Themes from /themes/registry.js
+const availableThemes = (Array.isArray(window.IPODIFY_THEMES) && window.IPODIFY_THEMES.length > 0)
+    ? window.IPODIFY_THEMES
+    : [{ id: 'classic', name: 'Classic 1G', css: null }];
+
 // State
 const state = {
     accessToken: null,
@@ -10,6 +15,7 @@ const state = {
     menuStack: [],
     currentMenu: null,
     selectedIndex: 0,
+    theme: savedPrefs.theme || 'classic',
     clickerEnabled: savedPrefs.clickerEnabled !== undefined ? savedPrefs.clickerEnabled : true,
     backlight: savedPrefs.backlight || false,
     showBatteryPercent: savedPrefs.showBatteryPercent !== undefined ? savedPrefs.showBatteryPercent : true,
@@ -42,6 +48,7 @@ let deferredInstallPrompt = null;
 
 function savePreferences() {
     localStorage.setItem('ipodify_prefs', JSON.stringify({
+        theme: state.theme,
         clickerEnabled: state.clickerEnabled,
         backlight: state.backlight,
         showBatteryPercent: state.showBatteryPercent
@@ -63,10 +70,60 @@ const btnMenu = document.getElementById('btn-menu');
 const btnPrev = document.getElementById('btn-prev');
 const btnNext = document.getElementById('btn-next');
 const btnPlayPause = document.getElementById('btn-play-pause');
+const themeLinkEl = document.getElementById('dynamic-theme-css');
+const ambientStageEl = document.getElementById('ambient-stage');
+const ambientArtworkEl = document.getElementById('ambient-artwork');
 
 if (state.backlight) {
     screenEl.classList.add('backlight-on');
 }
+
+// --- Theme Engine ---
+function getCurrentThemeObj() {
+    return availableThemes.find(t => t.id === state.theme) || availableThemes[0];
+}
+
+function getTrackArtworkUrl(track) {
+    if (!track || !track.album || !Array.isArray(track.album.images) || track.album.images.length === 0) {
+        return null;
+    }
+    return track.album.images[0].url || null;
+}
+
+function updateAmbientArtwork() {
+    if (!ambientArtworkEl) return;
+    const artUrl = getTrackArtworkUrl(state.currentTrack);
+    if (artUrl && state.theme !== 'classic') {
+        ambientArtworkEl.style.backgroundImage = `url("${artUrl}")`;
+    } else {
+        ambientArtworkEl.style.backgroundImage = 'none';
+    }
+}
+
+function applyTheme(themeId) {
+    const themeObj = availableThemes.find(t => t.id === themeId) || availableThemes[0];
+    state.theme = themeObj.id;
+    document.body.setAttribute('data-theme', themeObj.id);
+
+    if (themeLinkEl) {
+        themeLinkEl.setAttribute('href', themeObj.css || '');
+    }
+
+    if (ambientStageEl) {
+        ambientStageEl.style.display = themeObj.id === 'classic' ? 'none' : 'block';
+    }
+
+    updateAmbientArtwork();
+    savePreferences();
+}
+
+function cycleThemeState() {
+    const currentIndex = availableThemes.findIndex(t => t.id === state.theme);
+    const nextIndex = (currentIndex + 1) % availableThemes.length;
+    applyTheme(availableThemes[nextIndex].id);
+}
+
+applyTheme(state.theme);
 
 // --- PWA Service Worker & Install Prompt ---
 if ('serviceWorker' in navigator) {
@@ -218,7 +275,6 @@ function handleMove(e) {
     angleAccumulator += deltaAngle;
     totalDragAngle += Math.abs(deltaAngle);
 
-    // Если запущена игра Brick, двигаем ракетку плавно от угла колеса
     if (state.currentMenu === 'brick_game') {
         moveBrickPaddle(deltaAngle * 1.4);
     }
@@ -340,6 +396,12 @@ const menus = {
         title: 'Settings',
         items: [
             { label: 'About', type: 'about' },
+            {
+                label: 'Theme',
+                type: 'toggle',
+                action: 'cycleTheme',
+                getValue: () => getCurrentThemeObj().name
+            },
             {
                 label: 'Shuffle',
                 type: 'toggle',
@@ -504,8 +566,8 @@ function renderAbout(animateDir = null, customMessage = null) {
             <div class="about-row"><span>Songs</span><span>${songsCount}</span></div>
             <div class="about-row"><span>Albums</span><span>${albumsCount}</span></div>
             <div class="about-row"><span>Playlists</span><span>${playlistsCount}</span></div>
-            <div class="about-row"><span>Battery</span><span>${state.batteryLevel}%</span></div>
-            <div class="about-row"><span>Version</span><span>1.2 (2026)</span></div>
+            <div class="about-row"><span>Theme</span><span>${getCurrentThemeObj().name}</span></div>
+            <div class="about-row"><span>Version</span><span>1.3 (2026)</span></div>
         </div>
     `;
 
@@ -715,7 +777,8 @@ function renderNowPlaying(animateDir = null) {
     const title = state.currentTrack ? state.currentTrack.name : 'Not Playing';
     const artist = state.currentTrack ? state.currentTrack.artists.map(a => a.name).join(', ') : '';
     const album = state.currentTrack ? state.currentTrack.album.name : '';
-    const isLongTitle = title.length > 24;
+    const artworkUrl = getTrackArtworkUrl(state.currentTrack);
+    const isLongTitle = title.length > (state.theme === 'classic' ? 24 : 18);
 
     const formatTime = (ms) => {
         const totalSeconds = Math.floor(Math.max(0, ms) / 1000);
@@ -731,16 +794,29 @@ function renderNowPlaying(animateDir = null) {
     const shuffleBadge = state.shuffle ? '🔀' : '';
     const repeatBadge = state.repeatMode === 1 ? '🔁' : (state.repeatMode === 2 ? '🔂' : '');
 
+    // В теме Classic 1G обложка скрыта (display: none), а в iOS 26 и других новых темах отображается слева от названия
+    const artworkBlockHTML = `
+        <div class="np-artwork-wrap" style="display: none;">
+            ${artworkUrl
+                ? `<img class="np-artwork" src="${artworkUrl}" alt="Cover" />`
+                : `<div class="np-artwork-placeholder">♪</div>`
+            }
+        </div>
+    `;
+
     const html = `
         <div class="now-playing">
             <div class="np-header">
                 <span>${trackIndexText}</span>
                 <span class="np-modes">${ state.isScrubbing ? '[Scrub]' : '' } ${shuffleBadge} ${repeatBadge}</span>
             </div>
-            <div class="np-info">
-                <div class="np-title ${isLongTitle ? 'marquee' : ''}"><span>${title}</span></div>
-                <div class="np-artist">${artist}</div>
-                <div class="np-album">${album}</div>
+            <div class="np-main-row">
+                ${artworkBlockHTML}
+                <div class="np-info">
+                    <div class="np-title ${isLongTitle ? 'marquee' : ''}"><span>${title}</span></div>
+                    <div class="np-artist">${artist}</div>
+                    <div class="np-album">${album}</div>
+                </div>
             </div>
 
             <div class="np-progress-container" style="display: ${state.showVolume ? 'none' : 'block'}">
@@ -1002,7 +1078,10 @@ function handleSelect() {
         state.menuStack.push({ id: state.currentMenu, index: state.selectedIndex });
         renderNowPlaying('right');
     } else if (item.type === 'toggle') {
-        if (item.action === 'toggleClicker') {
+        if (item.action === 'cycleTheme') {
+            cycleThemeState();
+            renderMenu(state.currentMenu);
+        } else if (item.action === 'toggleClicker') {
             state.clickerEnabled = !state.clickerEnabled;
             savePreferences();
             playPiezoClick(true);
@@ -1645,6 +1724,7 @@ function initPlayer() {
         }
 
         updateStatusPlayIcon();
+        updateAmbientArtwork();
 
         if (state.currentMenu === 'now_playing') {
             renderNowPlaying();
