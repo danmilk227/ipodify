@@ -580,7 +580,8 @@ async function loadPlaylistTracks(playlistId, title) {
     state.selectedIndex = 0;
     renderMenu(menuId, 'right');
 
-    const data = await fetchSpotifyAPI(`/playlists/${playlistId}/tracks?limit=50`);
+    // Pass market parameter from token as Spotify sometimes requires market for correct track fetching
+    const data = await fetchSpotifyAPI(`/playlists/${playlistId}/tracks?limit=50&market=from_token`);
     if (data && data.error) {
         menus[menuId].items = [{ label: 'Err: ' + data.error, type: 'none' }];
         if (state.currentMenu === menuId) renderMenu(menuId);
