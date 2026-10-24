@@ -580,15 +580,18 @@ async function loadPlaylistTracks(playlistId, title) {
     state.selectedIndex = 0;
     renderMenu(menuId, 'right');
 
-    const data = await fetchSpotifyAPI(`/playlists/${playlistId}/tracks?limit=50`);
+    const data = await fetchSpotifyAPI(`/playlists/${playlistId}?fields=tracks.items(track(name,uri))`);
     if (data && data.error) {
         menus[menuId].items = [{ label: 'Err: ' + data.error, type: 'none' }];
         if (state.currentMenu === menuId) renderMenu(menuId);
         return;
     }
-    if (data && data.items && data.items.length > 0) {
+
+    // Parse based on the fields we requested
+    const items = data && data.tracks ? data.tracks.items : (data && data.items ? data.items : null);
+    if (items && items.length > 0) {
         // Filter out null tracks (sometimes happens with local files in playlists)
-        const validItems = data.items.filter(t => t.track && t.track.uri);
+        const validItems = items.filter(t => t && t.track && t.track.uri);
 
         if (validItems.length > 0) {
             menus[menuId].items = validItems.map(t => ({
