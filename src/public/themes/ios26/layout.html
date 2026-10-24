@@ -1,84 +1,27 @@
-<!-- ============================================================
-     SVG-фильтры преломления — ДОЛЖНЫ быть первыми в body
-     ============================================================ -->
-<svg width="0" height="0" style="position:absolute;pointer-events:none" aria-hidden="true">
-  <defs>
-    <!-- КОРПУС: сильное органическое искажение по кромке -->
-    <filter id="liquid-lens-shell" x="-20%" y="-20%" width="140%" height="140%">
-      <feTurbulence type="fractalNoise"
-                    baseFrequency="0.008 0.012"
-                    numOctaves="2"
-                    seed="7"
-                    result="noise"/>
-      <feGaussianBlur in="noise" stdDeviation="6" result="softNoise"/>
-      <feDisplacementMap in="SourceGraphic"
-                         in2="softNoise"
-                         scale="55"
-                         xChannelSelector="R"
-                         yChannelSelector="G"/>
-    </filter>
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>iOS 26 Liquid Glass — Clean Refraction</title>
+<link rel="stylesheet" href="style.css">
+</head>
+<body data-theme="ios26">
 
-    <!-- ЭКРАН: среднее искажение -->
-    <filter id="liquid-lens-screen" x="-20%" y="-20%" width="140%" height="140%">
-      <feTurbulence type="fractalNoise"
-                    baseFrequency="0.01 0.015"
-                    numOctaves="2"
-                    seed="3"
-                    result="n"/>
-      <feGaussianBlur in="n" stdDeviation="4" result="sn"/>
-      <feDisplacementMap in="SourceGraphic"
-                         in2="sn"
-                         scale="38"
-                         xChannelSelector="R"
-                         yChannelSelector="G"/>
-    </filter>
-
-    <!-- КОЛЕСО: самое сильное -->
-    <filter id="liquid-lens-wheel" x="-20%" y="-20%" width="140%" height="140%">
-      <feTurbulence type="fractalNoise"
-                    baseFrequency="0.006 0.01"
-                    numOctaves="2"
-                    seed="11"
-                    result="n"/>
-      <feGaussianBlur in="n" stdDeviation="5" result="sn"/>
-      <feDisplacementMap in="SourceGraphic"
-                         in2="sn"
-                         scale="70"
-                         xChannelSelector="R"
-                         yChannelSelector="G"/>
-    </filter>
-
-    <!-- ЦЕНТРАЛЬНАЯ КНОПКА -->
-    <filter id="liquid-lens-drop" x="-25%" y="-25%" width="150%" height="150%">
-      <feTurbulence type="fractalNoise"
-                    baseFrequency="0.02 0.03"
-                    numOctaves="1"
-                    seed="5"
-                    result="n"/>
-      <feGaussianBlur in="n" stdDeviation="3" result="sn"/>
-      <feDisplacementMap in="SourceGraphic"
-                         in2="sn"
-                         scale="28"
-                         xChannelSelector="R"
-                         yChannelSelector="G"/>
-    </filter>
-  </defs>
-</svg>
-
-<!-- ============================================================
-     Сцена с резкими цветными капсулами + контрастный паттерн
-     ============================================================ -->
+<!-- Сцена с фоном -->
 <div class="ios26-stage">
-    <div class="ios26-ambient-cover" id="ambient-artwork"></div>
+    <div class="ios26-ambient-cover"></div>
     <div class="ios26-pill pill-green"></div>
     <div class="ios26-pill pill-rainbow"></div>
     <div class="ios26-pill pill-blue"></div>
 </div>
 
+<!-- Корпус устройства -->
 <div class="ipod-container ios26-shell-wrap">
     <div class="ipod ios26-device">
+        
         <!-- HOLD -->
-        <div class="hold-switch-wrapper ios26-hold" id="hold-switch" title="Toggle Hold Lock">
+        <div class="hold-switch-wrapper ios26-hold" id="hold-switch">
             <span class="hold-label">HOLD</span>
             <div class="hold-track">
                 <div class="hold-orange"></div>
@@ -90,18 +33,23 @@
         <div class="screen-bezel ios26-screen-lens">
             <div class="screen" id="screen">
                 <div class="status-bar">
-                    <span id="status-title" class="status-title-text">iPod</span>
+                    <span id="status-title">Now Playing</span>
                     <div class="status-icons">
-                        <span id="status-lock-icon" class="status-icon"></span>
-                        <span id="status-play-icon" class="status-icon"></span>
-                        <span id="battery-text" class="battery-text"></span>
+                        <span>▶</span>
+                        <span>🔋</span>
                         <div class="battery-icon" id="battery-icon">
-                            <div class="battery-level" id="battery-level"></div>
+                            <div class="battery-level" style="width: 100%;"></div>
                         </div>
                     </div>
                 </div>
-
-                <div class="screen-content" id="screen-content"></div>
+                <div class="screen-content" id="screen-content">
+                    <!-- Контент экрана -->
+                    <div class="menu-list">
+                        <div class="menu-item">Music</div>
+                        <div class="menu-item active">Now Playing</div>
+                        <div class="menu-item">Settings</div>
+                    </div>
+                </div>
             </div>
         </div>
 
@@ -109,18 +57,15 @@
         <div class="wheel-container ios26-wheel-wrap">
             <div class="click-wheel ios26-wheel" id="click-wheel">
                 <div class="wheel-button menu-btn" id="btn-menu">MENU</div>
-                <div class="wheel-button prev-btn" id="btn-prev">
-                    <svg width="22" height="22" viewBox="0 0 24 24" fill="currentColor"><path d="M6 6h2v12H6zm3.5 6l8.5 6V6z"/></svg>
-                </div>
-                <div class="wheel-button next-btn" id="btn-next">
-                    <svg width="22" height="22" viewBox="0 0 24 24" fill="currentColor"><path d="M6 18l8.5-6L6 6v12zM16 6v12h2V6h-2z"/></svg>
-                </div>
-                <div class="wheel-button play-pause-btn" id="btn-play-pause">
-                    <svg width="22" height="22" viewBox="0 0 24 24" fill="currentColor"><path d="M7 6v12l9-6-9-6zm10 0h2v12h-2V6z"/></svg>
-                </div>
-
+                <div class="wheel-button prev-btn" id="btn-prev">◀◀</div>
+                <div class="wheel-button next-btn" id="btn-next">▶▶</div>
+                <div class="wheel-button play-pause-btn" id="btn-play-pause">▶❚❚</div>
                 <div class="center-button ios26-center-drop" id="btn-center"></div>
             </div>
         </div>
+        
     </div>
 </div>
+
+</body>
+</html>
