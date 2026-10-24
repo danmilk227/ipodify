@@ -583,7 +583,7 @@ async function loadPlaylistTracks(playlistId, title) {
         renderMenu(menuId, 'right');
     }
 
-    let data = await fetchSpotifyAPI(`/playlists/${playlistId}/tracks?limit=50`);
+    let data = await fetchSpotifyAPI(`/playlists/${playlistId}/items?limit=50`);
 
     if (data && data.error) {
         menus[menuId].items = [{ label: 'Err: ' + data.error, type: 'none' }];
@@ -593,16 +593,19 @@ async function loadPlaylistTracks(playlistId, title) {
 
     if (data && data.items && data.items.length > 0) {
         // Filter out null tracks
-        const validItems = data.items.filter(t => t && t.track && t.track.uri);
+        const validItems = data.items.filter(t => t && (t.track || t.item) && (t.track || t.item).uri);
 
         if (validItems.length > 0) {
-            menus[menuId].items = validItems.map(t => ({
-                label: t.track.name,
-                type: 'track',
-                uri: t.track.uri,
-                context_uri: `spotify:playlist:${playlistId}`
-            }));
-            menus[menuId].uris = validItems.map(t => t.track.uri);
+            menus[menuId].items = validItems.map(t => {
+                const trackObj = t.track || t.item;
+                return {
+                    label: trackObj.name,
+                    type: 'track',
+                    uri: trackObj.uri,
+                    context_uri: `spotify:playlist:${playlistId}`
+                };
+            });
+            menus[menuId].uris = validItems.map(t => (t.track || t.item).uri);
         } else {
             menus[menuId].items = [{ label: 'No playable tracks', type: 'none' }];
         }
@@ -624,13 +627,7 @@ async function loadArtistTracks(artistId, title) {
         renderMenu(menuId, 'right');
     }
 
-    // Try without market first
     let data = await fetchSpotifyAPI(`/artists/${artistId}/top-tracks`);
-
-    // If it fails (e.g. 403), try with a fallback market
-    if (data && data.error) {
-        data = await fetchSpotifyAPI(`/artists/${artistId}/top-tracks?market=US`);
-    }
 
     if (data && data.error) {
         menus[menuId].items = [{ label: 'Err: ' + data.error, type: 'none' }];
