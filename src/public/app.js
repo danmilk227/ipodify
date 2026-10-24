@@ -1,6 +1,8 @@
 // State
 const state = {
     accessToken: null,
+    currentUserId: null,
+    savedTracksCache: [], // Кэш сохраненных треков для быстрого поиска по артистам
     menuStack: [], // Array to keep track of navigation history
     currentMenu: null,
     selectedIndex: 0,
@@ -34,7 +36,6 @@ function vibrate(duration = 10) {
 }
 
 // --- Click Wheel Logic ---
-// Used to differentiate between a tap and a drag
 let totalDragAngle = 0;
 let isDragging = false;
 let startAngle = 0;
@@ -46,16 +47,13 @@ function getAngle(x, y) {
     const rect = wheel.getBoundingClientRect();
     const centerX = rect.left + rect.width / 2;
     const centerY = rect.top + rect.height / 2;
-    // Calculate angle in degrees (0 is right, 90 is bottom)
     let angle = Math.atan2(y - centerY, x - centerX) * (180 / Math.PI);
     if (angle < 0) angle += 360;
     return angle;
 }
 
 function handleStart(e) {
-    totalDragAngle = 0; // Reset drag amount on every touch start
-
-    // We don't ignore buttons anymore so dragging can start anywhere on the wheel
+    totalDragAngle = 0;
     if (e.target.id === 'btn-center') return;
 
     isDragging = true;
@@ -64,8 +62,6 @@ function handleStart(e) {
     startAngle = getAngle(clientX, clientY);
     lastAngle = startAngle;
     angleAccumulator = 0;
-
-    // We don't preventDefault here to allow clicks to register naturally if not dragging
 }
 
 function handleMove(e) {
@@ -77,22 +73,19 @@ function handleMove(e) {
 
     let deltaAngle = currentAngle - lastAngle;
 
-    // Handle wrap around (e.g., 359 to 0)
     if (deltaAngle > 180) deltaAngle -= 360;
     if (deltaAngle < -180) deltaAngle += 360;
 
     angleAccumulator += deltaAngle;
-    totalDragAngle += Math.abs(deltaAngle); // Track total movement distance
+    totalDragAngle += Math.abs(deltaAngle);
 
     if (Math.abs(angleAccumulator) >= ANGLE_THRESHOLD) {
         const ticks = Math.trunc(angleAccumulator / ANGLE_THRESHOLD);
 
         if (ticks > 0) {
-            // Scroll down / Clockwise
             handleScroll(1);
             angleAccumulator -= ticks * ANGLE_THRESHOLD;
         } else if (ticks < 0) {
-            // Scroll up / Counter-clockwise
             handleScroll(-1);
             angleAccumulator -= ticks * ANGLE_THRESHOLD;
         }
@@ -100,7 +93,6 @@ function handleMove(e) {
 
     lastAngle = currentAngle;
 
-    // If we've dragged significantly, prevent default to stop scrolling the page/clicking
     if (totalDragAngle > 5) {
         if (e.cancelable) e.preventDefault();
     }
@@ -120,11 +112,8 @@ wheel.addEventListener('touchmove', handleMove, { passive: false });
 wheel.addEventListener('touchend', handleEnd);
 
 // --- Button Clicks ---
-
-// Helper to detect if click is exactly on a button or its area
 function setupButton(element, callback) {
     element.addEventListener('click', (e) => {
-        // If the user rotated the wheel, cancel the button click
         if (totalDragAngle > 5) {
             return;
         }
@@ -161,10 +150,7 @@ setupButton(btnPlayPause, () => {
     }
 });
 
-
 // --- UI Rendering & Menu Logic ---
-
-// Menu definitions
 const menus = {
     main: {
         title: 'iPod',
@@ -204,7 +190,8 @@ function renderMenu(menuId, animateDir = null) {
     let html = '<ul class="menu-list">';
     menu.items.forEach((item, index) => {
         const isActive = index === state.selectedIndex ? 'active' : '';
-        const arrow = item.type === 'menu' ? '<span class="menu-arrow">></span>' : '';
+        const hasSubmenu = ['menu', 'playlist_folder', 'artist_folder'].includes(item.type);
+        const arrow = hasSubmenu ? '<span class="menu-arrow">></span>' : '';
         const value = item.getValue ? `<span>${item.getValue()}</span>` : '';
 
         html += `
@@ -232,9 +219,11 @@ function renderMenu(menuId, animateDir = null) {
 
         setTimeout(() => {
             screenContent.innerHTML = html;
+            updateActiveItem();
         }, 200);
     } else {
         screenContent.innerHTML = html;
+        updateActiveItem();
     }
 }
 
@@ -272,7 +261,7 @@ function renderNowPlaying(animateDir = null) {
                 </div>
                 <div class="np-time">
                     <span>${formatTime(state.position)}</span>
-                    <span>-${formatTime(state.duration - state.position)}</span>
+                    <span>-${formatTime(Math.max(0, state.duration - state.position))}</span>
                 </div>
             </div>
 
@@ -312,7 +301,6 @@ function updateActiveItem() {
     items.forEach((item, index) => {
         if (index === state.selectedIndex) {
             item.classList.add('active');
-            // Basic scrolling to keep active item in view
             const scrollOffset = item.offsetTop - (screenContent.clientHeight / 2) + (item.clientHeight / 2);
             screenContent.scrollTo({ top: scrollOffset, behavior: 'smooth' });
         } else {
@@ -324,16 +312,15 @@ function updateActiveItem() {
 function handleScroll(direction) {
     if (state.currentMenu === 'now_playing') {
         if (state.player) {
-            // Adjust volume. Spotify volume is 0.0 to 1.0
             state.player.getVolume().then(volume => {
-                let newVolume = volume + (direction * 0.05); // change by 5% per tick
+                let newVolume = volume + (direction * 0.05);
                 if (newVolume > 1) newVolume = 1;
                 if (newVolume < 0) newVolume = 0;
 
                 state.player.setVolume(newVolume).then(() => {
                     state.volume = newVolume;
                     state.showVolume = true;
-                    renderNowPlaying(); // Re-render to show volume bar
+                    renderNowPlaying();
                     vibrate(5);
 
                     if (volumeTimeout) clearTimeout(volumeTimeout);
@@ -358,7 +345,7 @@ function handleScroll(direction) {
 
     if (newIndex !== state.selectedIndex) {
         state.selectedIndex = newIndex;
-        vibrate(5); // Small tick
+        vibrate(5);
         updateActiveItem();
     }
 }
@@ -373,18 +360,27 @@ function handleSelect() {
     if (!menu || !menu.items) return;
 
     const item = menu.items[state.selectedIndex];
+    if (!item) return;
 
     if (item.type === 'menu') {
         state.menuStack.push({ id: state.currentMenu, index: state.selectedIndex });
         state.selectedIndex = 0;
         renderMenu(item.target, 'right');
+    } else if (item.type === 'playlist_folder') {
+        loadPlaylistTracks(item.id, item.label, item.ownerId, item.collaborative);
+    } else if (item.type === 'artist_folder') {
+        loadArtistTracks(item.id, item.label);
+    } else if (item.type === 'play_context') {
+        playEntireContext(item.context_uri, item.menuId);
+    } else if (item.type === 'track') {
+        playContext(item.uri, item.context_uri, menu.uris);
     } else if (item.type === 'now_playing') {
         state.menuStack.push({ id: state.currentMenu, index: state.selectedIndex });
         renderNowPlaying('right');
     } else if (item.type === 'toggle') {
         if (item.action === 'toggleHaptics') {
             state.hapticsEnabled = !state.hapticsEnabled;
-            renderMenu(state.currentMenu); // re-render to update text
+            renderMenu(state.currentMenu);
         }
     } else if (item.type === 'action') {
         if (item.action === 'login') {
@@ -398,11 +394,6 @@ function handleSelect() {
                 renderMenu('auth');
             });
         }
-    } else if (item.type === 'track') {
-        // Play track via Spotify API
-        if (state.accessToken && item.uri) {
-            playTrack(item.uri);
-        }
     }
 }
 
@@ -411,37 +402,6 @@ function handleMenuBack() {
         const prev = state.menuStack.pop();
         state.selectedIndex = prev.index;
         renderMenu(prev.id, 'left');
-    }
-}
-
-// Check for hash parameters (auth)
-function checkAuth() {
-    const hash = window.location.hash.substring(1);
-    const params = new URLSearchParams(hash);
-    const token = params.get('access_token');
-    const error = params.get('error');
-
-    if (token) {
-        state.accessToken = token;
-        window.history.replaceState({}, document.title, window.location.pathname);
-        renderMenu('main');
-        // Will initialize Spotify SDK and fetch data in next steps
-    } else {
-        // Try to refresh token if it exists
-        fetch('/refresh_token')
-            .then(res => res.json())
-            .then(data => {
-                if (data.access_token) {
-                    state.accessToken = data.access_token;
-                    renderMenu('main');
-                    // init app
-                } else {
-                    renderMenu('auth');
-                }
-            })
-            .catch(() => {
-                renderMenu('auth');
-            });
     }
 }
 
@@ -457,66 +417,95 @@ async function fetchSpotifyAPI(endpoint) {
         });
 
         if (response.status === 401) {
-            // Token expired, let's trigger a reload to try refreshing
             window.location.reload();
             return null;
         }
 
+        // Безопасное чтение тела ответа (Spotify может вернуть plain-text "Forbidden" или пустое тело)
+        const rawText = await response.text();
+        let data = null;
+        if (rawText) {
+            try {
+                data = JSON.parse(rawText);
+            } catch (_) {
+                data = null;
+            }
+        }
+
         if (!response.ok) {
-            const errData = await response.json();
-            let errMsg = response.statusText;
-            if (errData && errData.error) {
-                errMsg = errData.error.message || errData.error;
+            let errMsg = response.statusText || `HTTP ${response.status}`;
+            if (data && data.error) {
+                errMsg = data.error.message || data.error;
+            } else if (rawText) {
+                errMsg = rawText.slice(0, 40);
             }
             return { error: errMsg, status: response.status };
         }
 
-        return await response.json();
+        return data;
     } catch (e) {
         console.error("Error fetching Spotify API", e);
-        return null;
+        return { error: e.message || 'Network error', status: 0 };
     }
 }
 
 async function loadData() {
-    // Load Playlists
-    const playlistsData = await fetchSpotifyAPI('/me/playlists?limit=20');
-    if (playlistsData && playlistsData.items) {
-        menus.playlists.items = playlistsData.items.map(p => ({
-            label: p.name,
-            type: 'playlist_folder',
-            uri: p.uri,
-            id: p.id
-        }));
+    // 0. Загружаем профиль текущего пользователя, чтобы знать свой user.id
+    const meData = await fetchSpotifyAPI('/me');
+    if (meData && meData.id) {
+        state.currentUserId = meData.id;
+    }
+
+    // 1. Load Playlists (фильтруем null-элементы, которые Spotify иногда возвращает)
+    const playlistsData = await fetchSpotifyAPI('/me/playlists?limit=50');
+    if (playlistsData && Array.isArray(playlistsData.items)) {
+        const validPlaylists = playlistsData.items.filter(p => p && p.id && p.name);
+        menus.playlists.items = validPlaylists.length > 0
+            ? validPlaylists.map(p => ({
+                label: p.name,
+                type: 'playlist_folder',
+                uri: p.uri,
+                id: p.id,
+                ownerId: p.owner ? p.owner.id : null,
+                collaborative: Boolean(p.collaborative)
+            }))
+            : [{ label: 'No Playlists', type: 'none' }];
     } else {
         menus.playlists.items = [{ label: 'No Playlists', type: 'none' }];
     }
 
-    // Load Artists (Followed Artists)
+    // 2. Load Artists (Followed Artists)
     const artistsData = await fetchSpotifyAPI('/me/following?type=artist&limit=50');
-    if (artistsData && artistsData.artists && artistsData.artists.items) {
-        menus.artists.items = artistsData.artists.items.map(a => ({
-            label: a.name,
-            type: 'artist_folder',
-            uri: a.uri,
-            id: a.id
-        }));
+    if (artistsData && artistsData.artists && Array.isArray(artistsData.artists.items)) {
+        const validArtists = artistsData.artists.items.filter(a => a && a.id && a.name);
+        menus.artists.items = validArtists.length > 0
+            ? validArtists.map(a => ({
+                label: a.name,
+                type: 'artist_folder',
+                uri: a.uri,
+                id: a.id
+            }))
+            : [{ label: 'No Artists', type: 'none' }];
     } else {
         menus.artists.items = [{ label: 'No Artists', type: 'none' }];
     }
 
-    // Load Songs (Saved Tracks)
+    // 3. Load Songs (Saved Tracks) + индексация для раздела Artists
     const songsData = await fetchSpotifyAPI('/me/tracks?limit=50');
-    if (songsData && songsData.items) {
-        menus.songs.items = songsData.items.map(t => ({
-            label: t.track.name,
-            type: 'track',
-            uri: t.track.uri
-        }));
-        // Store all URIs for playing in context
-        menus.songs.uris = songsData.items.map(t => t.track.uri);
+    if (songsData && Array.isArray(songsData.items)) {
+        const validTracks = songsData.items
+            .map(entry => entry && (entry.track || entry.item))
+            .filter(track => track && track.uri && track.name && !track.is_local);
 
-        // Start background loading for the rest of the tracks
+        state.savedTracksCache = [...validTracks];
+
+        menus.songs.items = validTracks.map(track => ({
+            label: track.name,
+            type: 'track',
+            uri: track.uri
+        }));
+        menus.songs.uris = validTracks.map(track => track.uri);
+
         if (songsData.total > 50) {
             loadRemainingSongsBackground(songsData.total);
         }
@@ -524,7 +513,6 @@ async function loadData() {
         menus.songs.items = [{ label: 'No Songs', type: 'none' }];
     }
 
-    // If currently on one of these menus, re-render
     if (['playlists', 'artists', 'songs'].includes(state.currentMenu)) {
         renderMenu(state.currentMenu);
     }
@@ -535,85 +523,168 @@ async function loadRemainingSongsBackground(totalTracks) {
     while (offset < totalTracks) {
         try {
             const data = await fetchSpotifyAPI(`/me/tracks?limit=50&offset=${offset}`);
-            if (data && data.items && data.items.length > 0) {
-                const newItems = data.items.map(t => ({
-                    label: t.track.name,
+            if (data && Array.isArray(data.items) && data.items.length > 0) {
+                const validTracks = data.items
+                    .map(entry => entry && (entry.track || entry.item))
+                    .filter(track => track && track.uri && track.name && !track.is_local);
+
+                state.savedTracksCache.push(...validTracks);
+
+                const newItems = validTracks.map(track => ({
+                    label: track.name,
                     type: 'track',
-                    uri: t.track.uri
+                    uri: track.uri
                 }));
-                const newUris = data.items.map(t => t.track.uri);
+                const newUris = validTracks.map(track => track.uri);
 
                 menus.songs.items = [...menus.songs.items, ...newItems];
                 menus.songs.uris = [...menus.songs.uris, ...newUris];
 
-                // If the user is currently on the songs menu, re-render it to show new tracks
-                // We shouldn't interrupt their scrolling too much, but updateActiveItem or renderMenu handles it.
-                // However, renderMenu resets the view. To be safe, we only append to the array.
-                // If they are on the menu, we might need a non-destructive re-render or let them scroll.
-                // For simplicity, just update the data model. Next time they enter, it's there.
-                // If they are in the menu currently, rendering again might reset their scroll position.
-                // So we only update the data object in background.
                 if (state.currentMenu === 'songs') {
-                    // We can optionally refresh, but to avoid resetting scroll position on old iPod,
-                    // we will just let it be. If they scroll past the old limit, we'd need to re-render.
-                    // For now, let's trigger a soft re-render if they are at the bottom, or just re-render.
-                    // A quick re-render:
                     const oldIndex = state.selectedIndex;
                     renderMenu('songs');
                     state.selectedIndex = oldIndex;
                     updateActiveItem();
                 }
+            } else {
+                break;
             }
             offset += 50;
         } catch (e) {
             console.error("Error loading background songs", e);
-            break; // stop on error
+            break;
         }
     }
 }
 
-async function loadPlaylistTracks(playlistId, title) {
-    const menuId = `playlist_${playlistId}`;
+// Вспомогательная функция: извлечение треков чужого плейлиста через очередь плеера (обход ограничения Dev Mode)
+async function probePlaylistTracksViaQueue(playlistId) {
+    if (!state.accessToken || !state.deviceId || !state.player) return [];
 
-    // Check if we are already in this menu to prevent double-pushing
-    if (state.currentMenu !== menuId) {
-        // Initialize empty if it doesn't exist to prevent "Loading..." flash
-        if (!menus[menuId]) {
-            menus[menuId] = { title: title, items: [] };
+    // Чтобы не прерывать уже играющую у пользователя музыку, делаем тихий пробник только если плеер на паузе
+    if (state.isPlaying) return [];
+
+    const prevVolume = state.volume || 0.5;
+    try {
+        await state.player.setVolume(0);
+
+        await fetch(`https://api.spotify.com/v1/me/player/play?device_id=${state.deviceId}`, {
+            method: 'PUT',
+            headers: {
+                'Authorization': `Bearer ${state.accessToken}`,
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({ context_uri: `spotify:playlist:${playlistId}` })
+        });
+
+        await new Promise(r => setTimeout(r, 450));
+
+        const queueData = await fetchSpotifyAPI('/me/player/queue');
+        const sdkState = await state.player.getCurrentState();
+
+        await state.player.pause();
+        await state.player.setVolume(prevVolume);
+        state.isPlaying = false;
+
+        const collected = [];
+        const seenUris = new Set();
+
+        const addTrack = (t) => {
+            if (t && t.uri && t.name && !seenUris.has(t.uri)) {
+                seenUris.add(t.uri);
+                collected.push(t);
+            }
+        };
+
+        if (queueData && !queueData.error) {
+            addTrack(queueData.currently_playing);
+            if (Array.isArray(queueData.queue)) {
+                queueData.queue.forEach(addTrack);
+            }
         }
+
+        if (sdkState && sdkState.track_window) {
+            addTrack(sdkState.track_window.current_track);
+            if (Array.isArray(sdkState.track_window.next_tracks)) {
+                sdkState.track_window.next_tracks.forEach(addTrack);
+            }
+        }
+
+        return collected;
+    } catch (e) {
+        console.error("Queue probe failed", e);
+        try { await state.player.setVolume(prevVolume); } catch (_) {}
+        return [];
+    }
+}
+
+async function loadPlaylistTracks(playlistId, title, ownerId = null, collaborative = false) {
+    const menuId = `playlist_${playlistId}`;
+    const contextUri = `spotify:playlist:${playlistId}`;
+
+    if (state.currentMenu !== menuId) {
+        menus[menuId] = {
+            title: title,
+            items: [{ label: 'Loading...', type: 'none' }]
+        };
         state.menuStack.push({ id: state.currentMenu, index: state.selectedIndex });
         state.selectedIndex = 0;
         renderMenu(menuId, 'right');
     }
 
+    // 1. Пробуем новый эндпоинт 2026 года /items
     let data = await fetchSpotifyAPI(`/playlists/${playlistId}/items?limit=50`);
 
-    if (data && data.error) {
-        menus[menuId].items = [{ label: 'Err: ' + data.error, type: 'none' }];
-        if (state.currentMenu === menuId) renderMenu(menuId);
-        return;
+    // 2. Если вернулась ошибка, пробуем классический /playlists/{id}
+    if (!data || data.error || (!data.items && !data.tracks)) {
+        const fallbackData = await fetchSpotifyAPI(`/playlists/${playlistId}`);
+        if (fallbackData && !fallbackData.error) {
+            data = fallbackData.items || fallbackData.tracks || fallbackData;
+        }
     }
 
-    if (data && data.items && data.items.length > 0) {
-        // Filter out null tracks
-        const validItems = data.items.filter(t => t && (t.track || t.item) && (t.track || t.item).uri);
+    const rawEntries = (data && Array.isArray(data.items))
+        ? data.items
+        : (data && data.tracks && Array.isArray(data.tracks.items) ? data.tracks.items : []);
 
-        if (validItems.length > 0) {
-            menus[menuId].items = validItems.map(t => {
-                const trackObj = t.track || t.item;
-                return {
+    const validTracks = rawEntries
+        .map(entry => entry && (entry.item || entry.track || (entry.uri ? entry : null)))
+        .filter(track => track && track.uri && track.name && !track.is_local);
+
+    if (validTracks.length > 0) {
+        menus[menuId].items = [
+            { label: '▶ Play Playlist', type: 'play_context', context_uri: contextUri, menuId: menuId },
+            ...validTracks.map(trackObj => ({
+                label: trackObj.name,
+                type: 'track',
+                uri: trackObj.uri,
+                context_uri: contextUri
+            }))
+        ];
+        menus[menuId].uris = validTracks.map(t => t.uri);
+    } else {
+        // В Dev Mode (февраль 2026) Spotify скрывает треки чужих сохраненных плейлистов.
+        // Пробуем подтянуть треки через очередь Web Playback SDK:
+        const queueTracks = await probePlaylistTracksViaQueue(playlistId);
+
+        if (queueTracks.length > 0) {
+            menus[menuId].items = [
+                { label: '▶ Play Playlist', type: 'play_context', context_uri: contextUri, menuId: menuId },
+                ...queueTracks.map(trackObj => ({
                     label: trackObj.name,
                     type: 'track',
                     uri: trackObj.uri,
-                    context_uri: `spotify:playlist:${playlistId}`
-                };
-            });
-            menus[menuId].uris = validItems.map(t => (t.track || t.item).uri);
+                    context_uri: contextUri
+                }))
+            ];
+            menus[menuId].uris = queueTracks.map(t => t.uri);
         } else {
-            menus[menuId].items = [{ label: 'No playable tracks', type: 'none' }];
+            // Если музыка уже играет, не прерываем её — даем кнопку запуска плейлиста, которая сама подгрузит очередь
+            menus[menuId].items = [
+                { label: '▶ Play & Load Tracks', type: 'play_context', context_uri: contextUri, menuId: menuId }
+            ];
+            menus[menuId].uris = [];
         }
-    } else {
-        menus[menuId].items = [{ label: 'No tracks', type: 'none' }];
     }
 
     if (state.currentMenu === menuId) renderMenu(menuId);
@@ -622,48 +693,136 @@ async function loadPlaylistTracks(playlistId, title) {
 async function loadArtistTracks(artistId, title) {
     const menuId = `artist_${artistId}`;
 
-    // Check if we are already in this menu to prevent double-pushing
     if (state.currentMenu !== menuId) {
-        // Initialize empty if it doesn't exist to prevent "Loading..." flash
-        if (!menus[menuId]) {
-            menus[menuId] = { title: title, items: [] };
-        }
+        menus[menuId] = {
+            title: title,
+            items: [{ label: 'Loading...', type: 'none' }]
+        };
         state.menuStack.push({ id: state.currentMenu, index: state.selectedIndex });
         state.selectedIndex = 0;
         renderMenu(menuId, 'right');
     }
 
-    let data = await fetchSpotifyAPI(`/artists/${artistId}/top-tracks?market=from_token`);
+    const mergedTracksMap = new Map();
+    const addTrackIfValid = (track) => {
+        if (track && track.uri && track.name && !track.is_local && !mergedTracksMap.has(track.uri)) {
+            mergedTracksMap.set(track.uri, track);
+        }
+    };
 
-    // Fallback to Search API if top-tracks throws 403 Forbidden or other errors
-    if (data && data.error) {
-        data = await fetchSpotifyAPI(`/search?q=artist:${encodeURIComponent(title)}&type=track&limit=50`);
+    // 1. Сначала берем все сохраненные треки этого исполнителя из медиатеки пользователя
+    const normalizedTitle = title.trim().toLowerCase();
+    state.savedTracksCache.forEach(track => {
+        if (Array.isArray(track.artists)) {
+            const matchesArtist = track.artists.some(
+                a => a.id === artistId || (a.name && a.name.toLowerCase() === normalizedTitle)
+            );
+            if (matchesArtist) addTrackIfValid(track);
+        }
+    });
+
+    // 2. Так как GET /artists/{id}/top-tracks удален в феврале 2026 года,
+    // используем GET /search с новым максимальным лимитом Dev Mode (limit=10)
+    const exactQuery = encodeURIComponent(`artist:"${title}"`);
+    let searchData = await fetchSpotifyAPI(`/search?q=${exactQuery}&type=track&limit=10`);
+
+    // Если точный фильтр в кавычках ничего не дал или вернул ошибку, делаем общий поиск по имени
+    if (!searchData || searchData.error || !searchData.tracks || !searchData.tracks.items || searchData.tracks.items.length === 0) {
+        searchData = await fetchSpotifyAPI(`/search?q=${encodeURIComponent(title)}&type=track&limit=10`);
     }
 
-    if (data && data.error) {
-        menus[menuId].items = [{ label: 'Err: ' + data.error, type: 'none' }];
-        if (state.currentMenu === menuId) renderMenu(menuId);
-        return;
+    if (searchData && searchData.tracks && Array.isArray(searchData.tracks.items)) {
+        // Сначала добавляем треки со строгим совпадением artist.id
+        searchData.tracks.items.forEach(track => {
+            if (track && Array.isArray(track.artists) && track.artists.some(a => a.id === artistId)) {
+                addTrackIfValid(track);
+            }
+        });
+
+        // Если по ID ничего не нашлось, проверяем совпадение по имени исполнителя
+        if (mergedTracksMap.size === 0) {
+            searchData.tracks.items.forEach(track => {
+                if (track && Array.isArray(track.artists) && track.artists.some(a => a.name && a.name.toLowerCase() === normalizedTitle)) {
+                    addTrackIfValid(track);
+                }
+            });
+        }
     }
 
-    // Handle parsing depending on which endpoint returned the data
-    const tracksArray = data.tracks && data.tracks.items ? data.tracks.items : (data.tracks || []);
+    const finalTracks = Array.from(mergedTracksMap.values());
 
-    if (tracksArray && tracksArray.length > 0) {
-        menus[menuId].items = tracksArray.map(t => ({
+    if (finalTracks.length > 0) {
+        // ВАЖНО: Не передаем context_uri: spotify:artist:{id} вместе с offset,
+        // так как Spotify API запрещает offset для контекста артиста. Передаем массив uris!
+        menus[menuId].items = finalTracks.map(t => ({
             label: t.name,
             type: 'track',
             uri: t.uri,
-            context_uri: `spotify:artist:${artistId}`
+            context_uri: null
         }));
-        menus[menuId].uris = tracksArray.map(t => t.uri);
+        menus[menuId].uris = finalTracks.map(t => t.uri);
     } else {
-        menus[menuId].items = [{ label: 'No tracks', type: 'none' }];
+        menus[menuId].items = [
+            { label: '▶ Play Artist Radio', type: 'play_context', context_uri: `spotify:artist:${artistId}`, menuId: menuId }
+        ];
+        menus[menuId].uris = [];
     }
 
     if (state.currentMenu === menuId) renderMenu(menuId);
 }
 
+// Запуск всего контекста (например, чужого плейлиста) с автоматической подгрузкой очереди в меню
+async function playEntireContext(contextUri, menuId = null) {
+    if (!state.accessToken || !state.deviceId) return;
+
+    try {
+        await fetch(`https://api.spotify.com/v1/me/player/play?device_id=${state.deviceId}`, {
+            method: 'PUT',
+            headers: {
+                'Authorization': `Bearer ${state.accessToken}`,
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({ context_uri: contextUri })
+        });
+
+        state.menuStack.push({ id: state.currentMenu, index: state.selectedIndex });
+        renderNowPlaying('right');
+
+        // В фоне подтягиваем треки из очереди плеера в меню плейлиста
+        if (menuId && menus[menuId]) {
+            setTimeout(async () => {
+                const queueData = await fetchSpotifyAPI('/me/player/queue');
+                if (queueData && !queueData.error) {
+                    const tracks = [];
+                    const seen = new Set();
+                    const add = (t) => {
+                        if (t && t.uri && t.name && !seen.has(t.uri)) {
+                            seen.add(t.uri);
+                            tracks.push(t);
+                        }
+                    };
+                    add(queueData.currently_playing);
+                    if (Array.isArray(queueData.queue)) queueData.queue.forEach(add);
+
+                    if (tracks.length > 0) {
+                        menus[menuId].items = [
+                            { label: '▶ Play Playlist', type: 'play_context', context_uri: contextUri, menuId: menuId },
+                            ...tracks.map(t => ({
+                                label: t.name,
+                                type: 'track',
+                                uri: t.uri,
+                                context_uri: contextUri
+                            }))
+                        ];
+                        menus[menuId].uris = tracks.map(t => t.uri);
+                    }
+                }
+            }, 600);
+        }
+    } catch (e) {
+        console.error("Error playing entire context", e);
+    }
+}
 
 async function playContext(uri, contextUri = null, allUris = null) {
     if (!state.accessToken || !state.deviceId) return;
@@ -671,23 +830,22 @@ async function playContext(uri, contextUri = null, allUris = null) {
     try {
         let body = {};
 
-        if (contextUri) {
-            // Play from a specific context (like a playlist or artist) and start at the track
+        // Spotify разрешает offset: { uri } только для playlist и album контекстов (не для artist!)
+        if (contextUri && (contextUri.includes(':playlist:') || contextUri.includes(':album:'))) {
             body = {
                 context_uri: contextUri,
                 offset: { uri: uri }
             };
         } else if (allUris && allUris.length > 0) {
-            // Play a flat list of URIs (like the saved "Songs" list) so prev/next works
-            // Find the index of the clicked track to start there
             const trackIndex = allUris.indexOf(uri);
-            // Spotify API allows max 385 uris in the array, 50 is fine.
+            const startIndex = trackIndex !== -1 ? trackIndex : 0;
+            // Ограничиваем окно до 100 URI, чтобы не превысить лимит размера тела запроса Spotify
+            const slicedUris = allUris.slice(startIndex, startIndex + 100);
             body = {
-                uris: allUris,
-                offset: { position: trackIndex !== -1 ? trackIndex : 0 }
+                uris: slicedUris,
+                offset: { position: 0 }
             };
         } else {
-            // Fallback for single track
             body = { uris: [uri] };
         }
 
@@ -700,7 +858,6 @@ async function playContext(uri, contextUri = null, allUris = null) {
             body: JSON.stringify(body)
         });
 
-        // Go to now playing screen
         state.menuStack.push({ id: state.currentMenu, index: state.selectedIndex });
         renderNowPlaying('right');
 
@@ -709,40 +866,14 @@ async function playContext(uri, contextUri = null, allUris = null) {
     }
 }
 
-// Modify handleSelect to support nested menus and playing contexts
-const originalHandleSelect = handleSelect;
-handleSelect = function() {
-    if (state.currentMenu === 'now_playing') {
-        if (state.player) state.player.togglePlay();
-        return;
-    }
-
-    const menu = menus[state.currentMenu];
-    if (!menu || !menu.items) return;
-
-    const item = menu.items[state.selectedIndex];
-
-    if (item.type === 'playlist_folder') {
-        loadPlaylistTracks(item.id, item.label);
-    } else if (item.type === 'artist_folder') {
-        loadArtistTracks(item.id, item.label);
-    } else if (item.type === 'track') {
-        // Pass the context or the full list of URIs in this menu to enable prev/next skipping
-        playContext(item.uri, item.context_uri, menu.uris);
-    } else {
-        originalHandleSelect(); // Call original for navigation
-    }
-}
-
 // --- Spotify Web Playback SDK Integration ---
 window.onSpotifyWebPlaybackSDKReady = () => {
     if (!state.accessToken) return;
-
     initPlayer();
 };
 
 function initPlayer() {
-    if (state.player) return; // Already initialized
+    if (state.player) return;
 
     const player = new Spotify.Player({
         name: 'iPodify Web Player',
@@ -750,13 +881,11 @@ function initPlayer() {
         volume: 0.5
     });
 
-    // Error handling
     player.addListener('initialization_error', ({ message }) => { console.error(message); });
     player.addListener('authentication_error', ({ message }) => { console.error(message); });
     player.addListener('account_error', ({ message }) => { console.error(message); });
     player.addListener('playback_error', ({ message }) => { console.error(message); });
 
-    // Playback status updates
     player.addListener('player_state_changed', stateUpdate => {
         if (!stateUpdate) return;
 
@@ -766,41 +895,34 @@ function initPlayer() {
         state.isPlaying = !stateUpdate.paused;
 
         if (state.currentMenu === 'now_playing') {
-            renderNowPlaying(); // Re-render to update UI without animation
+            renderNowPlaying();
         }
     });
 
-    // Ready
     player.addListener('ready', ({ device_id }) => {
         console.log('Ready with Device ID', device_id);
         state.deviceId = device_id;
         state.player = player;
 
-        // Load library data once ready
         loadData();
     });
 
-    // Not Ready
     player.addListener('not_ready', ({ device_id }) => {
         console.log('Device ID has gone offline', device_id);
     });
 
-    // Connect to the player!
     player.connect();
 
-    // Start interval to update progress bar if playing
     setInterval(() => {
         if (state.isPlaying && state.currentMenu === 'now_playing') {
             state.position += 1000;
             if (state.position > state.duration) state.position = state.duration;
-            renderNowPlaying(); // Basic re-render for progress
+            renderNowPlaying();
         }
     }, 1000);
 }
 
-// Modify checkAuth to init player if token exists and SDK is already loaded
-const originalCheckAuth = checkAuth;
-checkAuth = function() {
+function checkAuth() {
     const hash = window.location.hash.substring(1);
     const params = new URLSearchParams(hash);
     const token = params.get('access_token');
@@ -811,7 +933,6 @@ checkAuth = function() {
         renderMenu('main');
         if (window.Spotify) initPlayer();
     } else {
-        // Try to refresh token if it exists
         fetch('/refresh_token')
             .then(res => res.json())
             .then(data => {
