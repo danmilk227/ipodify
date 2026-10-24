@@ -464,7 +464,11 @@ async function fetchSpotifyAPI(endpoint) {
 
         if (!response.ok) {
             const errData = await response.json();
-            return { error: errData.error || response.statusText };
+            let errMsg = response.statusText;
+            if (errData && errData.error) {
+                errMsg = errData.error.message || errData.error;
+            }
+            return { error: errMsg, status: response.status };
         }
 
         return await response.json();
@@ -578,7 +582,7 @@ async function loadPlaylistTracks(playlistId, title) {
 
     const data = await fetchSpotifyAPI(`/playlists/${playlistId}/tracks?limit=50`);
     if (data && data.error) {
-        menus[menuId].items = [{ label: 'Err: ' + (data.error.message || data.error), type: 'none' }];
+        menus[menuId].items = [{ label: 'Err: ' + data.error, type: 'none' }];
         if (state.currentMenu === menuId) renderMenu(menuId);
         return;
     }
@@ -614,7 +618,7 @@ async function loadArtistTracks(artistId, title) {
 
     const data = await fetchSpotifyAPI(`/artists/${artistId}/top-tracks?market=from_token`);
     if (data && data.error) {
-        menus[menuId].items = [{ label: 'Err: ' + (data.error.message || data.error), type: 'none' }];
+        menus[menuId].items = [{ label: 'Err: ' + data.error, type: 'none' }];
         if (state.currentMenu === menuId) renderMenu(menuId);
         return;
     }
