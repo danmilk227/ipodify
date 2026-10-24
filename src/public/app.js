@@ -580,8 +580,7 @@ async function loadPlaylistTracks(playlistId, title) {
     state.selectedIndex = 0;
     renderMenu(menuId, 'right');
 
-    // Pass market parameter from token as Spotify sometimes requires market for correct track fetching
-    const data = await fetchSpotifyAPI(`/playlists/${playlistId}/tracks?limit=50&market=from_token`);
+    const data = await fetchSpotifyAPI(`/playlists/${playlistId}/tracks?limit=50`);
     if (data && data.error) {
         menus[menuId].items = [{ label: 'Err: ' + data.error, type: 'none' }];
         if (state.currentMenu === menuId) renderMenu(menuId);
@@ -617,20 +616,21 @@ async function loadArtistTracks(artistId, title) {
     state.selectedIndex = 0;
     renderMenu(menuId, 'right');
 
-    const data = await fetchSpotifyAPI(`/artists/${artistId}/top-tracks?market=from_token`);
+    // Search API is more reliable than top-tracks which frequently throws 403 based on market/token type
+    const data = await fetchSpotifyAPI(`/search?q=artist:${encodeURIComponent(title)}&type=track&limit=50`);
     if (data && data.error) {
         menus[menuId].items = [{ label: 'Err: ' + data.error, type: 'none' }];
         if (state.currentMenu === menuId) renderMenu(menuId);
         return;
     }
-    if (data && data.tracks && data.tracks.length > 0) {
-        menus[menuId].items = data.tracks.map(t => ({
+    if (data && data.tracks && data.tracks.items && data.tracks.items.length > 0) {
+        menus[menuId].items = data.tracks.items.map(t => ({
             label: t.name,
             type: 'track',
             uri: t.uri,
             context_uri: `spotify:artist:${artistId}`
         }));
-        menus[menuId].uris = data.tracks.map(t => t.uri);
+        menus[menuId].uris = data.tracks.items.map(t => t.uri);
     } else {
         menus[menuId].items = [{ label: 'No tracks', type: 'none' }];
     }
