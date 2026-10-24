@@ -1,17 +1,13 @@
-<!-- Чёткие контрастные линии и сферы позади плеера, которые преломляются на гранях жидкого стекла -->
+<!-- Чёткий светлый фон с резкими цветными капсулами как в презентации Apple Liquid Glass -->
 <div class="ios26-stage">
     <div class="ios26-ambient-cover" id="ambient-artwork"></div>
-    <div class="ios26-ribbon ribbon-spectrum"></div>
-    <div class="ios26-ribbon ribbon-cyan"></div>
-    <div class="ios26-orb orb-green"></div>
-    <div class="ios26-orb orb-magenta"></div>
+    <div class="ios26-pill pill-green"></div>
+    <div class="ios26-pill pill-rainbow"></div>
+    <div class="ios26-pill pill-blue"></div>
 </div>
 
 <div class="ipod-container ios26-shell-wrap">
     <div class="ipod ios26-device">
-        <!-- Оптическая кромка преломления по периметру корпуса -->
-        <div class="liquid-rim-layer"></div>
-
         <!-- Верхняя стеклянная капсула HOLD -->
         <div class="hold-switch-wrapper ios26-hold" id="hold-switch" title="Toggle Hold Lock">
             <span class="hold-label">HOLD</span>
@@ -21,7 +17,7 @@
             </div>
         </div>
 
-        <!-- Стеклянная линза экрана (увеличенная высота для крупной обложки) -->
+        <!-- Стеклянная линза экрана -->
         <div class="screen-bezel ios26-screen-lens">
             <div class="screen" id="screen">
                 <div class="status-bar">
@@ -40,10 +36,9 @@
             </div>
         </div>
 
-        <!-- Прозрачное водяное колесо Click Wheel с преломляющим ободом -->
+        <!-- Прозрачное водяное колесо Click Wheel -->
         <div class="wheel-container ios26-wheel-wrap">
             <div class="click-wheel ios26-wheel" id="click-wheel">
-                <div class="wheel-rim-refract"></div>
                 <div class="wheel-button menu-btn" id="btn-menu">MENU</div>
                 <div class="wheel-button prev-btn" id="btn-prev">
                     <svg width="22" height="22" viewBox="0 0 24 24" fill="currentColor"><path d="M6 6h2v12H6zm3.5 6l8.5 6V6z"/></svg>
@@ -52,7 +47,7 @@
                     <svg width="22" height="22" viewBox="0 0 24 24" fill="currentColor"><path d="M6 18l8.5-6L6 6v12zM16 6v12h2V6h-2z"/></svg>
                 </div>
                 <div class="wheel-button play-pause-btn" id="btn-play-pause">
-                    <svg width="22" height="22" viewBox="0 0 24 24" fill="currentColor"><path d="M6 5h8l-4 7 4 7H6V5zm9 0h3v14h-3V5z" opacity="0"/><path d="M7 6v12l9-6-9-6zm10 0h2v12h-2V6z"/></svg>
+                    <svg width="22" height="22" viewBox="0 0 24 24" fill="currentColor"><path d="M7 6v12l9-6-9-6zm10 0h2v12h-2V6z"/></svg>
                 </div>
 
                 <div class="center-button ios26-center-drop" id="btn-center"></div>
