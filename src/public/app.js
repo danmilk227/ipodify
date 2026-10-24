@@ -277,11 +277,9 @@ function renderNowPlaying(animateDir = null) {
             </div>
 
             <div class="np-volume-container" style="display: ${state.showVolume ? 'flex' : 'none'}">
-                <div class="np-volume-icon">🔉</div>
                 <div class="np-volume-bar-wrapper">
                     <div class="np-volume-fill" style="width: ${state.volume * 100}%"></div>
                 </div>
-                <div class="np-volume-icon">🔊</div>
             </div>
         </div>
     `;
@@ -578,8 +576,7 @@ async function loadPlaylistTracks(playlistId, title) {
     state.selectedIndex = 0;
     renderMenu(menuId, 'right');
 
-    // Ensure uniqueness via timestamp cache busting for edge cases and errors
-    const data = await fetchSpotifyAPI(`/playlists/${playlistId}/tracks?limit=50&_t=${Date.now()}`);
+    const data = await fetchSpotifyAPI(`/playlists/${playlistId}/tracks?limit=50`);
     if (data && data.error) {
         menus[menuId].items = [{ label: 'Err: ' + (data.error.message || data.error), type: 'none' }];
         if (state.currentMenu === menuId) renderMenu(menuId);
@@ -615,8 +612,7 @@ async function loadArtistTracks(artistId, title) {
     state.selectedIndex = 0;
     renderMenu(menuId, 'right');
 
-    // Ensure uniqueness via timestamp cache busting for edge cases and errors
-    const data = await fetchSpotifyAPI(`/artists/${artistId}/top-tracks?market=from_token&_t=${Date.now()}`);
+    const data = await fetchSpotifyAPI(`/artists/${artistId}/top-tracks?market=from_token`);
     if (data && data.error) {
         menus[menuId].items = [{ label: 'Err: ' + (data.error.message || data.error), type: 'none' }];
         if (state.currentMenu === menuId) renderMenu(menuId);

@@ -384,12 +384,6 @@ body {
     align-items: center;
 }
 
-.np-volume-icon {
-    font-size: 14px;
-    font-weight: bold;
-    margin-right: 5px;
-    margin-left: 5px;
-}
 
 .np-volume-bar-wrapper {
     flex: 1;
