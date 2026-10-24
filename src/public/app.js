@@ -635,20 +635,28 @@ async function loadArtistTracks(artistId, title) {
 
     let data = await fetchSpotifyAPI(`/artists/${artistId}/top-tracks?market=from_token`);
 
+    // Fallback to Search API if top-tracks throws 403 Forbidden or other errors
+    if (data && data.error) {
+        data = await fetchSpotifyAPI(`/search?q=artist:${encodeURIComponent(title)}&type=track&limit=50`);
+    }
+
     if (data && data.error) {
         menus[menuId].items = [{ label: 'Err: ' + data.error, type: 'none' }];
         if (state.currentMenu === menuId) renderMenu(menuId);
         return;
     }
 
-    if (data && data.tracks && data.tracks.length > 0) {
-        menus[menuId].items = data.tracks.map(t => ({
+    // Handle parsing depending on which endpoint returned the data
+    const tracksArray = data.tracks && data.tracks.items ? data.tracks.items : (data.tracks || []);
+
+    if (tracksArray && tracksArray.length > 0) {
+        menus[menuId].items = tracksArray.map(t => ({
             label: t.name,
             type: 'track',
             uri: t.uri,
             context_uri: `spotify:artist:${artistId}`
         }));
-        menus[menuId].uris = data.tracks.map(t => t.uri);
+        menus[menuId].uris = tracksArray.map(t => t.uri);
     } else {
         menus[menuId].items = [{ label: 'No tracks', type: 'none' }];
     }
