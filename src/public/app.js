@@ -633,7 +633,7 @@ async function loadArtistTracks(artistId, title) {
         renderMenu(menuId, 'right');
     }
 
-    let data = await fetchSpotifyAPI(`/artists/${artistId}/top-tracks`);
+    let data = await fetchSpotifyAPI(`/artists/${artistId}/top-tracks?market=from_token`);
 
     if (data && data.error) {
         menus[menuId].items = [{ label: 'Err: ' + data.error, type: 'none' }];
