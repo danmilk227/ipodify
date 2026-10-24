@@ -1,5 +1,6 @@
 /* ==========================================================================
-   iOS 26 True Liquid Glass (Zero Blur, Pure Edge Meniscus Refraction)
+   iOS 26 True Liquid Glass — STRONG EDITION
+   Толстая капля воды: SVG-преломление + хроматика + мениск + спекуляр
    ========================================================================== */
 
 body[data-theme="ios26"] {
@@ -10,7 +11,7 @@ body[data-theme="ios26"] {
     user-select: none;
 }
 
-/* --- Чистая сцена с резкими геометрическими капсулами без блюра (как на референсе Apple) --- */
+/* --- Сцена с резкими цветными капсулами + контрастный паттерн для преломления --- */
 .ios26-stage {
     position: fixed;
     inset: 0;
@@ -25,16 +26,29 @@ body[data-theme="ios26"] {
     inset: -10%;
     background-size: cover;
     background-position: center;
-    filter: blur(80px) saturate(1.8);
-    opacity: 0.14;
+    filter: blur(80px) saturate(2.2);
+    opacity: 0.32;
     transition: background-image 0.7s ease;
 }
 
-/* Никакого размытия у полос — бритвенно-чёткие края, чтобы преломление на гранях стекла было явным */
+/* Тонкий контрастный паттерн — преломление читается именно на границах */
+.ios26-stage::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    background:
+        repeating-linear-gradient(45deg,
+            rgba(0, 0, 0, 0.05) 0 2px,
+            transparent 2px 14px);
+    opacity: 0.6;
+    pointer-events: none;
+}
+
+/* Полосы — бритвенно-чёткие (лёгкий blur для мягкости фона) */
 .ios26-pill {
     position: absolute;
     border-radius: 999px;
-    filter: none !important;
+    filter: blur(1.5px);
 }
 
 .ios26-pill.pill-green {
@@ -68,40 +82,72 @@ body[data-theme="ios26"] {
     z-index: 2;
 }
 
-/* --- Главный корпус: 0px blur, прозрачная вода в центре + сильное преломление по кромке --- */
+/* --- ГЛАВНЫЙ КОРПУС: толстая капля воды --- */
 body[data-theme="ios26"] .ipod.ios26-device {
     width: 348px !important;
     height: 568px !important;
     padding: 20px 20px 24px !important;
     box-sizing: border-box !important;
     position: relative;
-    /* Абсолютно прозрачный центр (alpha 0.0) и тонкий стеклянный мениск только в последних 4% у края */
+    /* Мениск начинается раньше (с 62%) и утолщается к кромке */
     background: radial-gradient(
         102% 102% at 50% 50%,
         rgba(255, 255, 255, 0) 0%,
-        rgba(255, 255, 255, 0) 91%,
-        rgba(255, 255, 255, 0.22) 97%,
-        rgba(255, 255, 255, 0.68) 100%
+        rgba(255, 255, 255, 0) 62%,
+        rgba(255, 255, 255, 0.10) 82%,
+        rgba(255, 255, 255, 0.45) 93%,
+        rgba(255, 255, 255, 0.85) 99%,
+        rgba(255, 255, 255, 0.95) 100%
     ) !important;
-    /* НИКАКОГО blur()! Только SVG-карта краевого преломления мениска */
-    backdrop-filter: url(#liquid-lens-shell) saturate(135%) contrast(104%) !important;
-    -webkit-backdrop-filter: url(#liquid-lens-shell) saturate(135%) contrast(104%) !important;
+    /* Микро-блюр (0.5px) только для сглаживания артефактов displacement */
+    backdrop-filter: blur(0.5px) url(#liquid-lens-shell) saturate(135%) contrast(104%) !important;
+    -webkit-backdrop-filter: blur(0.5px) url(#liquid-lens-shell) saturate(135%) contrast(104%) !important;
     border-radius: 56px !important;
     border: 1.5px solid rgba(255, 255, 255, 0.92) !important;
-    /* Чёткие оптические грани капли воды без матового свечения */
+    /* Усиленная хроматика — шире и ярче */
     box-shadow:
-        0 24px 48px -12px rgba(15, 23, 42, 0.18),
+        0 24px 48px -12px rgba(15, 23, 42, 0.20),
         0 2px 8px rgba(15, 23, 42, 0.08),
-        inset 0 0 0 1px rgba(255, 255, 255, 0.7),
-        inset 2px 3px 4px rgba(255, 255, 255, 0.98),
-        inset -2px -3px 5px rgba(15, 23, 42, 0.14),
-        inset 4px 0 6px -2px rgba(0, 210, 255, 0.55),
-        inset -4px 0 6px -2px rgba(255, 0, 128, 0.55) !important;
+        inset 0 0 0 1px rgba(255, 255, 255, 0.9),
+        inset 2px 2px 6px rgba(255, 255, 255, 1),
+        inset -2px -3px 6px rgba(15, 23, 42, 0.16),
+        inset 6px 0 10px -2px rgba(0, 200, 255, 0.85),
+        inset -6px 0 10px -2px rgba(255, 0, 150, 0.85),
+        inset 0 6px 10px -3px rgba(120, 255, 200, 0.55),
+        inset 0 -6px 10px -3px rgba(255, 180, 0, 0.45) !important;
 }
 
-/* --- Переключатель HOLD (прозрачная капля) --- */
+/* Точечный спекуляр (блик-«солнце») */
+body[data-theme="ios26"] .ipod.ios26-device::before {
+    content: "";
+    position: absolute;
+    inset: 0;
+    border-radius: inherit;
+    pointer-events: none;
+    background:
+        radial-gradient(28% 18% at 22% 14%,
+            rgba(255, 255, 255, 0.95) 0%,
+            rgba(255, 255, 255, 0) 70%),
+        radial-gradient(14% 10% at 78% 88%,
+            rgba(255, 255, 255, 0.55) 0%,
+            rgba(255, 255, 255, 0) 70%);
+    mix-blend-mode: screen;
+    opacity: 0.9;
+    z-index: 0;
+}
+
+/* Fallback для браузеров без SVG backdrop-filter */
+@supports not (backdrop-filter: url(#liquid-lens-shell)) {
+    body[data-theme="ios26"] .ipod.ios26-device {
+        background: linear-gradient(135deg, rgba(255, 255, 255, 0.55), rgba(255, 255, 255, 0.15)) !important;
+    }
+}
+
+/* --- HOLD --- */
 body[data-theme="ios26"] .ios26-hold {
     margin-bottom: 8px !important;
+    position: relative;
+    z-index: 1;
 }
 
 body[data-theme="ios26"] .hold-label {
@@ -131,7 +177,7 @@ body[data-theme="ios26"] .hold-slider {
     box-shadow: 0 1px 4px rgba(0,0,0,0.25), inset 0 1px 1px #fff !important;
 }
 
-/* --- Экран: прозрачная водяная линза с краевым преломлением (#liquid-lens-screen) --- */
+/* --- ЭКРАН: водяная линза --- */
 body[data-theme="ios26"] .screen-bezel.ios26-screen-lens {
     background: transparent !important;
     padding: 0 !important;
@@ -140,6 +186,8 @@ body[data-theme="ios26"] .screen-bezel.ios26-screen-lens {
     width: 308px !important;
     height: 238px !important;
     margin-bottom: 18px !important;
+    position: relative;
+    z-index: 1;
 }
 
 body[data-theme="ios26"] .screen {
@@ -147,31 +195,29 @@ body[data-theme="ios26"] .screen {
     width: 308px !important;
     height: 238px !important;
     border-radius: 34px !important;
-    /* Центр полностью прозрачен (0.02), уплотнение только на самом ободке */
     background: radial-gradient(
         102% 102% at 50% 50%,
         rgba(255, 255, 255, 0.02) 0%,
-        rgba(255, 255, 255, 0.03) 89%,
-        rgba(255, 255, 255, 0.28) 97%,
-        rgba(255, 255, 255, 0.75) 100%
+        rgba(255, 255, 255, 0.02) 60%,
+        rgba(255, 255, 255, 0.12) 82%,
+        rgba(255, 255, 255, 0.42) 94%,
+        rgba(255, 255, 255, 0.80) 100%
     ) !important;
-    /* Без блюра! Чёткое преломление краёв */
-    backdrop-filter: url(#liquid-lens-screen) saturate(140%) contrast(105%) !important;
-    -webkit-backdrop-filter: url(#liquid-lens-screen) saturate(140%) contrast(105%) !important;
+    backdrop-filter: blur(0.4px) url(#liquid-lens-screen) saturate(150%) contrast(108%) !important;
+    -webkit-backdrop-filter: blur(0.4px) url(#liquid-lens-screen) saturate(150%) contrast(108%) !important;
     border: 1.5px solid rgba(255, 255, 255, 0.95) !important;
     color: #0b111e !important;
     box-shadow:
-        0 10px 24px -6px rgba(15, 23, 42, 0.16),
-        inset 0 2px 3px rgba(255, 255, 255, 1),
-        inset 0 -2px 4px rgba(15, 23, 42, 0.14),
-        inset 3px 0 5px -1px rgba(0, 195, 255, 0.5),
-        inset -3px 0 5px -1px rgba(255, 0, 119, 0.5) !important;
+        0 10px 24px -6px rgba(15, 23, 42, 0.18),
+        inset 0 2px 4px rgba(255, 255, 255, 1),
+        inset 0 -2px 5px rgba(15, 23, 42, 0.16),
+        inset 4px 0 8px -1px rgba(0, 195, 255, 0.75),
+        inset -4px 0 8px -1px rgba(255, 0, 119, 0.75) !important;
     display: flex;
     flex-direction: column;
     overflow: hidden;
 }
 
-/* Ночной режим (Backlight -> Тёмное прозрачное стекло без мутности) */
 body[data-theme="ios26"] .screen.backlight-on {
     --screen-text: #f8fafc;
     background: radial-gradient(
@@ -184,7 +230,7 @@ body[data-theme="ios26"] .screen.backlight-on {
     border-color: rgba(255, 255, 255, 0.55) !important;
 }
 
-/* Статус-бар */
+/* --- Статус-бар --- */
 body[data-theme="ios26"] .status-bar {
     background: transparent !important;
     border-bottom: 1px solid rgba(255, 255, 255, 0.55) !important;
@@ -228,7 +274,7 @@ body[data-theme="ios26"] .battery-level {
     border-radius: 2.5px !important;
 }
 
-/* --- Меню: прозрачные пункты и выделение в виде водяной капли --- */
+/* --- Меню --- */
 body[data-theme="ios26"] .screen-content {
     flex: 1;
     position: relative;
@@ -249,13 +295,13 @@ body[data-theme="ios26"] .menu-item {
     background: transparent !important;
 }
 
-/* Выбранный пункт меню — прозрачная водяная капсула с чёткой гранью */
 body[data-theme="ios26"] .menu-item.active {
     background: radial-gradient(
         100% 160% at 50% 50%,
         rgba(255, 255, 255, 0.02) 0%,
-        rgba(255, 255, 255, 0.06) 78%,
-        rgba(255, 255, 255, 0.65) 100%
+        rgba(255, 255, 255, 0.06) 70%,
+        rgba(255, 255, 255, 0.35) 90%,
+        rgba(255, 255, 255, 0.75) 100%
     ) !important;
     color: #0b111e !important;
     border: 1px solid rgba(255, 255, 255, 0.95) !important;
@@ -263,15 +309,15 @@ body[data-theme="ios26"] .menu-item.active {
         0 4px 10px rgba(15, 23, 42, 0.12),
         inset 0 1.5px 2px rgba(255, 255, 255, 1),
         inset 0 -1.5px 2px rgba(15, 23, 42, 0.12),
-        inset 3px 0 5px rgba(0, 198, 255, 0.45),
-        inset -3px 0 5px rgba(255, 0, 128, 0.45) !important;
+        inset 4px 0 6px rgba(0, 198, 255, 0.65),
+        inset -4px 0 6px rgba(255, 0, 128, 0.65) !important;
 }
 
 body[data-theme="ios26"] .screen.backlight-on .menu-item.active {
     color: #ffffff !important;
 }
 
-/* Скроллбар */
+/* --- Скроллбар --- */
 body[data-theme="ios26"] .ipod-scrollbar {
     border: 1px solid rgba(255, 255, 255, 0.8) !important;
     background: rgba(255, 255, 255, 0.05) !important;
@@ -286,7 +332,7 @@ body[data-theme="ios26"] .ipod-scrollbar-thumb {
     border: none !important;
 }
 
-/* --- Экран Now Playing с крупной обложкой --- */
+/* --- Now Playing --- */
 .ios26-np-view {
     display: flex;
     flex-direction: column;
@@ -389,7 +435,6 @@ body[data-theme="ios26"] .ipod-scrollbar-thumb {
     text-overflow: ellipsis;
 }
 
-/* Прогресс-бар и прозрачная капля-ползунок */
 .ios26-np-bottom {
     margin-top: 6px;
 }
@@ -409,7 +454,6 @@ body[data-theme="ios26"] .ipod-scrollbar-thumb {
     position: relative;
 }
 
-/* Прозрачная капля воды на ползунке (как на референсе Apple) */
 .ios26-glass-knob {
     position: absolute;
     top: 50%;
@@ -453,29 +497,51 @@ body[data-theme="ios26"] .ipod-scrollbar-thumb {
     flex: 1;
 }
 
-/* --- Click Wheel: Прозрачная водяная линза (#liquid-lens-wheel) без блюра --- */
+/* --- CLICK WHEEL: самое толстое стекло --- */
+body[data-theme="ios26"] .wheel-container {
+    position: relative;
+    z-index: 1;
+}
+
 body[data-theme="ios26"] .click-wheel.ios26-wheel {
     width: 226px !important;
     height: 226px !important;
     position: relative;
-    /* Полностью прозрачное тело, блик только по самому кольцу мениска */
     background: radial-gradient(
         circle at 50% 50%,
         rgba(255, 255, 255, 0) 0%,
-        rgba(255, 255, 255, 0) 84%,
-        rgba(255, 255, 255, 0.25) 95%,
-        rgba(255, 255, 255, 0.78) 100%
+        rgba(255, 255, 255, 0) 55%,
+        rgba(255, 255, 255, 0.10) 78%,
+        rgba(255, 255, 255, 0.45) 92%,
+        rgba(255, 255, 255, 0.85) 99%,
+        rgba(255, 255, 255, 0.95) 100%
     ) !important;
-    /* Никакого blur() — чистое преломление цветной полосы на ободе колеса */
-    backdrop-filter: url(#liquid-lens-wheel) saturate(145%) contrast(106%) !important;
-    -webkit-backdrop-filter: url(#liquid-lens-wheel) saturate(145%) contrast(106%) !important;
+    backdrop-filter: blur(0.6px) url(#liquid-lens-wheel) saturate(155%) contrast(110%) !important;
+    -webkit-backdrop-filter: blur(0.6px) url(#liquid-lens-wheel) saturate(155%) contrast(110%) !important;
     border: 1.5px solid rgba(255, 255, 255, 0.96) !important;
     box-shadow:
-        0 14px 30px -8px rgba(15, 23, 42, 0.2),
+        0 14px 30px -8px rgba(15, 23, 42, 0.22),
         inset 0 2px 4px rgba(255, 255, 255, 1),
-        inset 0 -2px 4px rgba(15, 23, 42, 0.18),
-        inset 4px 0 7px -1px rgba(0, 210, 255, 0.55),
-        inset -4px 0 7px -1px rgba(255, 0, 128, 0.55) !important;
+        inset 0 -2px 5px rgba(15, 23, 42, 0.18),
+        inset 6px 0 10px -1px rgba(0, 210, 255, 0.85),
+        inset -6px 0 10px -1px rgba(255, 0, 128, 0.85) !important;
+}
+
+/* Спекуляр колеса */
+body[data-theme="ios26"] .click-wheel.ios26-wheel::before {
+    content: "";
+    position: absolute;
+    inset: 0;
+    border-radius: 50%;
+    pointer-events: none;
+    background:
+        radial-gradient(20% 14% at 24% 18%,
+            rgba(255, 255, 255, 0.9) 0%,
+            rgba(255, 255, 255, 0) 70%),
+        radial-gradient(10% 8% at 76% 82%,
+            rgba(255, 255, 255, 0.5) 0%,
+            rgba(255, 255, 255, 0) 70%);
+    mix-blend-mode: screen;
 }
 
 body[data-theme="ios26"] .wheel-button {
@@ -484,9 +550,11 @@ body[data-theme="ios26"] .wheel-button {
     font-size: 11px !important;
     letter-spacing: 0.08em !important;
     opacity: 0.9;
+    z-index: 2;
+    position: relative;
 }
 
-/* Центральная кнопка — выпуклая капля воды (#liquid-lens-drop) без мутности */
+/* Центральная кнопка — выпуклая капля */
 body[data-theme="ios26"] .center-button.ios26-center-drop {
     width: 78px !important;
     height: 78px !important;
@@ -494,19 +562,22 @@ body[data-theme="ios26"] .center-button.ios26-center-drop {
         circle at 30% 25%,
         rgba(255, 255, 255, 0.78) 0%,
         rgba(255, 255, 255, 0) 32%,
-        rgba(255, 255, 255, 0) 76%,
-        rgba(255, 255, 255, 0.68) 100%
+        rgba(255, 255, 255, 0) 70%,
+        rgba(255, 255, 255, 0.65) 92%,
+        rgba(255, 255, 255, 0.90) 100%
     ) !important;
-    backdrop-filter: url(#liquid-lens-drop) saturate(150%) contrast(108%) !important;
-    -webkit-backdrop-filter: url(#liquid-lens-drop) saturate(150%) contrast(108%) !important;
+    backdrop-filter: blur(0.5px) url(#liquid-lens-drop) saturate(150%) contrast(108%) !important;
+    -webkit-backdrop-filter: blur(0.5px) url(#liquid-lens-drop) saturate(150%) contrast(108%) !important;
     border: 1.5px solid rgba(255, 255, 255, 0.98) !important;
     box-shadow:
         0 8px 18px -4px rgba(15, 23, 42, 0.24),
         inset 0 2px 3px rgba(255, 255, 255, 1),
         inset 0 -2px 4px rgba(15, 23, 42, 0.18),
-        inset 3px 0 5px rgba(0, 195, 255, 0.5),
-        inset -3px 0 5px rgba(255, 0, 128, 0.5) !important;
+        inset 4px 0 7px rgba(0, 195, 255, 0.65),
+        inset -4px 0 7px rgba(255, 0, 128, 0.65) !important;
     transition: transform 0.12s ease;
+    z-index: 2;
+    position: relative;
 }
 
 body[data-theme="ios26"] .center-button.ios26-center-drop:active {
