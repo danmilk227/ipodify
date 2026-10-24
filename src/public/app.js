@@ -574,24 +574,26 @@ async function loadRemainingSongsBackground(totalTracks) {
 
 async function loadPlaylistTracks(playlistId, title) {
     const menuId = `playlist_${playlistId}`;
-    menus[menuId] = { title: title, items: [{ label: 'Loading...', type: 'none' }] };
 
-    state.menuStack.push({ id: state.currentMenu, index: state.selectedIndex });
-    state.selectedIndex = 0;
-    renderMenu(menuId, 'right');
+    // Check if we are already in this menu to prevent double-pushing
+    if (state.currentMenu !== menuId) {
+        menus[menuId] = { title: title, items: [{ label: 'Loading...', type: 'none' }] };
+        state.menuStack.push({ id: state.currentMenu, index: state.selectedIndex });
+        state.selectedIndex = 0;
+        renderMenu(menuId, 'right');
+    }
 
-    const data = await fetchSpotifyAPI(`/playlists/${playlistId}?fields=tracks.items(track(name,uri))`);
+    let data = await fetchSpotifyAPI(`/playlists/${playlistId}/tracks?limit=50`);
+
     if (data && data.error) {
         menus[menuId].items = [{ label: 'Err: ' + data.error, type: 'none' }];
         if (state.currentMenu === menuId) renderMenu(menuId);
         return;
     }
 
-    // Parse based on the fields we requested
-    const items = data && data.tracks ? data.tracks.items : (data && data.items ? data.items : null);
-    if (items && items.length > 0) {
-        // Filter out null tracks (sometimes happens with local files in playlists)
-        const validItems = items.filter(t => t && t.track && t.track.uri);
+    if (data && data.items && data.items.length > 0) {
+        // Filter out null tracks
+        const validItems = data.items.filter(t => t && t.track && t.track.uri);
 
         if (validItems.length > 0) {
             menus[menuId].items = validItems.map(t => ({
@@ -613,27 +615,37 @@ async function loadPlaylistTracks(playlistId, title) {
 
 async function loadArtistTracks(artistId, title) {
     const menuId = `artist_${artistId}`;
-    menus[menuId] = { title: title, items: [{ label: 'Loading...', type: 'none' }] };
 
-    state.menuStack.push({ id: state.currentMenu, index: state.selectedIndex });
-    state.selectedIndex = 0;
-    renderMenu(menuId, 'right');
+    // Check if we are already in this menu to prevent double-pushing
+    if (state.currentMenu !== menuId) {
+        menus[menuId] = { title: title, items: [{ label: 'Loading...', type: 'none' }] };
+        state.menuStack.push({ id: state.currentMenu, index: state.selectedIndex });
+        state.selectedIndex = 0;
+        renderMenu(menuId, 'right');
+    }
 
-    // Search API is more reliable than top-tracks which frequently throws 403 based on market/token type
-    const data = await fetchSpotifyAPI(`/search?q=artist:${encodeURIComponent(title)}&type=track&limit=50`);
+    // Try without market first
+    let data = await fetchSpotifyAPI(`/artists/${artistId}/top-tracks`);
+
+    // If it fails (e.g. 403), try with a fallback market
+    if (data && data.error) {
+        data = await fetchSpotifyAPI(`/artists/${artistId}/top-tracks?market=US`);
+    }
+
     if (data && data.error) {
         menus[menuId].items = [{ label: 'Err: ' + data.error, type: 'none' }];
         if (state.currentMenu === menuId) renderMenu(menuId);
         return;
     }
-    if (data && data.tracks && data.tracks.items && data.tracks.items.length > 0) {
-        menus[menuId].items = data.tracks.items.map(t => ({
+
+    if (data && data.tracks && data.tracks.length > 0) {
+        menus[menuId].items = data.tracks.map(t => ({
             label: t.name,
             type: 'track',
             uri: t.uri,
             context_uri: `spotify:artist:${artistId}`
         }));
-        menus[menuId].uris = data.tracks.items.map(t => t.uri);
+        menus[menuId].uris = data.tracks.map(t => t.uri);
     } else {
         menus[menuId].items = [{ label: 'No tracks', type: 'none' }];
     }
