@@ -11,8 +11,27 @@
     <link rel="apple-touch-icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 512 512'%3E%3Crect width='512' height='512' rx='90' fill='%23f4f4f4'/%3E%3Crect x='76' y='44' width='360' height='190' rx='18' fill='%23111'/%3E%3Crect x='92' y='60' width='328' height='158' rx='4' fill='%238ba79e'/%3E%3Ccircle cx='256' cy='364' r='112' fill='%23e2e2e2' stroke='%23ccc' stroke-width='6'/%3E%3Ccircle cx='256' cy='364' r='42' fill='%23f8f8f8' stroke='%23d4d4d4' stroke-width='4'/%3E%3C/svg%3E">
     <title>iPodify</title>
     <link rel="stylesheet" href="style.css">
+    <link id="dynamic-theme-css" rel="stylesheet" href="">
 </head>
 <body>
+    <!-- Скрытый SVG-фильтр преломления жидкого стекла для iOS 26 -->
+    <svg width="0" height="0" style="position:absolute; pointer-events:none;" aria-hidden="true">
+        <defs>
+            <filter id="ios26-liquid-refract" x="-10%" y="-10%" width="120%" height="120%">
+                <feTurbulence type="fractalNoise" baseFrequency="0.012" numOctaves="2" result="noise" />
+                <feDisplacementMap in="SourceGraphic" in2="noise" scale="6" xChannelSelector="R" yChannelSelector="G" />
+            </filter>
+        </defs>
+    </svg>
+
+    <!-- Фоновая сцена для преломления сквозь жидкое стекло (активна только в теме iOS 26) -->
+    <div class="ambient-stage" id="ambient-stage" style="display: none;">
+        <div class="ambient-artwork" id="ambient-artwork"></div>
+        <div class="ambient-orb orb-1"></div>
+        <div class="ambient-orb orb-2"></div>
+        <div class="ambient-orb orb-3"></div>
+    </div>
+
     <div class="ipod-container">
         <div class="ipod">
             <!-- Top Hold Switch (Classic iPod hardware detail) -->
@@ -65,8 +84,9 @@
         </div>
     </div>
 
-    <!-- Web Playback SDK -->
+    <!-- Web Playback SDK & Themes -->
     <script src="https://sdk.scdn.co/spotify-player.js"></script>
+    <script src="themes/registry.js"></script>
     <script src="app.js"></script>
 </body>
 </html>
