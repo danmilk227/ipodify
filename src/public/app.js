@@ -577,7 +577,10 @@ async function loadPlaylistTracks(playlistId, title) {
 
     // Check if we are already in this menu to prevent double-pushing
     if (state.currentMenu !== menuId) {
-        menus[menuId] = { title: title, items: [{ label: 'Loading...', type: 'none' }] };
+        // Initialize empty if it doesn't exist to prevent "Loading..." flash
+        if (!menus[menuId]) {
+            menus[menuId] = { title: title, items: [] };
+        }
         state.menuStack.push({ id: state.currentMenu, index: state.selectedIndex });
         state.selectedIndex = 0;
         renderMenu(menuId, 'right');
@@ -621,7 +624,10 @@ async function loadArtistTracks(artistId, title) {
 
     // Check if we are already in this menu to prevent double-pushing
     if (state.currentMenu !== menuId) {
-        menus[menuId] = { title: title, items: [{ label: 'Loading...', type: 'none' }] };
+        // Initialize empty if it doesn't exist to prevent "Loading..." flash
+        if (!menus[menuId]) {
+            menus[menuId] = { title: title, items: [] };
+        }
         state.menuStack.push({ id: state.currentMenu, index: state.selectedIndex });
         state.selectedIndex = 0;
         renderMenu(menuId, 'right');
