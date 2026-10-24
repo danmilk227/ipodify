@@ -464,6 +464,11 @@ async function fetchSpotifyAPI(endpoint) {
             return null;
         }
 
+        if (!response.ok) {
+            const errData = await response.json();
+            return { error: errData.error || response.statusText };
+        }
+
         return await response.json();
     } catch (e) {
         console.error("Error fetching Spotify API", e);
@@ -573,7 +578,13 @@ async function loadPlaylistTracks(playlistId, title) {
     state.selectedIndex = 0;
     renderMenu(menuId, 'right');
 
-    const data = await fetchSpotifyAPI(`/playlists/${playlistId}/tracks?limit=50`);
+    // Ensure uniqueness via timestamp cache busting for edge cases and errors
+    const data = await fetchSpotifyAPI(`/playlists/${playlistId}/tracks?limit=50&_t=${Date.now()}`);
+    if (data && data.error) {
+        menus[menuId].items = [{ label: 'Err: ' + (data.error.message || data.error), type: 'none' }];
+        if (state.currentMenu === menuId) renderMenu(menuId);
+        return;
+    }
     if (data && data.items && data.items.length > 0) {
         // Filter out null tracks (sometimes happens with local files in playlists)
         const validItems = data.items.filter(t => t.track && t.track.uri);
@@ -604,7 +615,13 @@ async function loadArtistTracks(artistId, title) {
     state.selectedIndex = 0;
     renderMenu(menuId, 'right');
 
-    const data = await fetchSpotifyAPI(`/artists/${artistId}/top-tracks?market=from_token`);
+    // Ensure uniqueness via timestamp cache busting for edge cases and errors
+    const data = await fetchSpotifyAPI(`/artists/${artistId}/top-tracks?market=from_token&_t=${Date.now()}`);
+    if (data && data.error) {
+        menus[menuId].items = [{ label: 'Err: ' + (data.error.message || data.error), type: 'none' }];
+        if (state.currentMenu === menuId) renderMenu(menuId);
+        return;
+    }
     if (data && data.tracks && data.tracks.length > 0) {
         menus[menuId].items = data.tracks.map(t => ({
             label: t.name,
