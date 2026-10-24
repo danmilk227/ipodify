@@ -3,10 +3,10 @@
     --ipod-height: 600px;
     --ipod-bg: #f8f8f8;
     --ipod-border: #e0e0e0;
-    --ipod-shadow: inset 0 0 15px rgba(0,0,0,0.1), 0 20px 40px rgba(0,0,0,0.2);
+    --ipod-shadow: inset 0 0 15px rgba(0,0,0,0.1), 0 20px 40px rgba(0,0,0,0.25);
 
     --screen-bezel-bg: #000;
-    --screen-bg: #8ba79e; /* Classic monochrome green/gray */
+    --screen-bg: #8ba79e;
     --screen-text: #1f2623;
     --screen-width: 280px;
     --screen-height: 210px;
@@ -62,6 +62,67 @@ body {
     background-image: linear-gradient(135deg, rgba(255,255,255,0.85) 0%, rgba(255,255,255,0) 25%, rgba(255,255,255,0) 75%, rgba(255,255,255,0.4) 100%);
 }
 
+/* Hardware Hold Switch on top right */
+.hold-switch-wrapper {
+    position: absolute;
+    top: 7px;
+    right: 36px;
+    display: flex;
+    align-items: center;
+    gap: 5px;
+    cursor: pointer;
+    z-index: 20;
+}
+
+.hold-label {
+    font-size: 9px;
+    font-weight: bold;
+    color: #888;
+    letter-spacing: 0.5px;
+}
+
+.hold-track {
+    width: 28px;
+    height: 10px;
+    background-color: #d0d0d0;
+    border-radius: 5px;
+    border: 1px solid #b5b5b5;
+    position: relative;
+    overflow: hidden;
+    box-shadow: inset 0 1px 2px rgba(0,0,0,0.2);
+}
+
+.hold-orange {
+    position: absolute;
+    left: 0;
+    top: 0;
+    width: 14px;
+    height: 100%;
+    background-color: #ff5500;
+    opacity: 0;
+    transition: opacity 0.15s ease;
+}
+
+.hold-slider {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 15px;
+    height: 100%;
+    background: linear-gradient(180deg, #fafafa, #dcdcdc);
+    border-radius: 4px;
+    border: 1px solid #aaa;
+    transition: transform 0.15s ease;
+}
+
+.hold-switch-wrapper.active .hold-orange {
+    opacity: 1;
+}
+
+.hold-switch-wrapper.active .hold-slider {
+    transform: translateX(11px);
+}
+
 @media (max-width: 400px), (max-height: 650px) {
     .ipod {
         width: 100vw;
@@ -71,6 +132,9 @@ body {
         border: none;
         padding-top: 5vh;
         background-image: none;
+    }
+    .hold-switch-wrapper {
+        top: 1.5vh;
     }
 }
 
@@ -102,7 +166,6 @@ body {
     background-image: repeating-linear-gradient(0deg, transparent, transparent 1px, rgba(0,0,0,0.03) 1px, rgba(0,0,0,0.03) 2px);
 }
 
-/* Подсветка 1-го поколения iPod (Indiglo Blue-White Backlight) */
 .screen.backlight-on {
     --screen-bg: #c6e6f5;
     --screen-text: #0d1b24;
@@ -126,15 +189,28 @@ body {
     transition: background-color 0.25s ease;
 }
 
+.status-title-text {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    max-width: 155px;
+}
+
 .status-icons {
     display: flex;
     align-items: center;
-    gap: 6px;
+    gap: 5px;
+    flex-shrink: 0;
 }
 
-.status-play-icon {
+.status-icon {
     font-size: 10px;
     line-height: 1;
+}
+
+.battery-text {
+    font-size: 11px;
+    font-weight: bold;
 }
 
 .battery-icon {
@@ -143,6 +219,8 @@ body {
     border: 2px solid var(--screen-text);
     position: relative;
     padding: 1px;
+    display: flex;
+    align-items: center;
 }
 
 .battery-icon::after {
@@ -159,6 +237,7 @@ body {
     height: 100%;
     width: 80%;
     background-color: var(--screen-text);
+    transition: width 0.3s ease;
 }
 
 .screen-content {
@@ -202,7 +281,7 @@ body {
     overflow: hidden;
     text-overflow: ellipsis;
     white-space: nowrap;
-    max-width: 215px;
+    max-width: 205px;
 }
 
 .menu-item-right {
@@ -260,7 +339,7 @@ body {
 
 .np-modes {
     display: flex;
-    gap: 6px;
+    gap: 5px;
 }
 
 .np-info {
@@ -271,6 +350,7 @@ body {
     align-items: center;
     text-align: center;
     overflow: hidden;
+    width: 100%;
 }
 
 .np-title {
@@ -281,6 +361,21 @@ body {
     overflow: hidden;
     text-overflow: ellipsis;
     width: 100%;
+}
+
+.np-title.marquee {
+    text-overflow: clip;
+}
+
+.np-title.marquee span {
+    display: inline-block;
+    padding-left: 20px;
+    animation: ipodMarquee 9s linear infinite;
+}
+
+@keyframes ipodMarquee {
+    0%, 15% { transform: translateX(0); }
+    85%, 100% { transform: translateX(-65%); }
 }
 
 .np-artist, .np-album {
@@ -312,7 +407,6 @@ body {
     width: 0%;
 }
 
-/* Scrubbing diamond indicator (iPod 1st Gen seek mode) */
 .np-scrub-diamond {
     position: absolute;
     top: -4px;
@@ -359,7 +453,7 @@ body {
     width: 0%;
 }
 
-/* About Screen */
+/* About, Clock & Brick Game Views */
 .about-view {
     padding: 8px 10px;
     font-size: 13px;
@@ -382,6 +476,36 @@ body {
     display: flex;
     justify-content: space-between;
     margin: 2px 0;
+}
+
+.clock-view {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    height: 100%;
+    padding: 10px;
+    text-align: center;
+}
+
+.clock-time {
+    font-size: 38px;
+    font-weight: bold;
+    letter-spacing: 1px;
+    border: 2px solid var(--screen-text);
+    padding: 6px 14px;
+    margin-bottom: 8px;
+}
+
+.clock-date {
+    font-size: 14px;
+    font-weight: bold;
+}
+
+.brick-canvas {
+    width: 100%;
+    height: 100%;
+    display: block;
 }
 
 /* CLICK WHEEL AREA */
