@@ -10,11 +10,15 @@ const state = {
     menuStack: [],
     currentMenu: null,
     selectedIndex: 0,
-    // Режимы отклика: 'both' (звук + вибро), 'sound' (только щелчок), 'vibe' (только вибро), 'off'
-    feedbackMode: savedPrefs.feedbackMode || 'both',
+    clickerEnabled: savedPrefs.clickerEnabled !== undefined ? savedPrefs.clickerEnabled : true,
     backlight: savedPrefs.backlight || false,
+    showBatteryPercent: savedPrefs.showBatteryPercent !== undefined ? savedPrefs.showBatteryPercent : true,
+    batteryLevel: 100,
+    batteryCharging: false,
+    isHoldLocked: false,
     shuffle: false,
-    repeatMode: 0, // 0: Off, 1: All (context), 2: One (track)
+    repeatMode: 0, // 0: Off, 1: All, 2: One
+    sleepMinutes: 0, // 0: Off, 15, 30, 60
     player: null,
     deviceId: null,
     isPlaying: false,
@@ -23,7 +27,7 @@ const state = {
     duration: 0,
     volume: 0.5,
     showVolume: false,
-    isScrubbing: false, // Режим перемотки трека колесом в Now Playing
+    isScrubbing: false,
     scrubPosition: 0,
     queueIndex: 1,
     queueTotal: 1
@@ -31,12 +35,16 @@ const state = {
 
 let volumeTimeout = null;
 let scrubTimeout = null;
+let sleepTimerTimeout = null;
+let clockInterval = null;
 let audioCtx = null;
+let deferredInstallPrompt = null;
 
 function savePreferences() {
     localStorage.setItem('ipodify_prefs', JSON.stringify({
-        feedbackMode: state.feedbackMode,
-        backlight: state.backlight
+        clickerEnabled: state.clickerEnabled,
+        backlight: state.backlight,
+        showBatteryPercent: state.showBatteryPercent
     }));
 }
 
@@ -45,6 +53,10 @@ const screenEl = document.getElementById('screen');
 const screenContent = document.getElementById('screen-content');
 const statusTitle = document.getElementById('status-title');
 const statusPlayIcon = document.getElementById('status-play-icon');
+const statusLockIcon = document.getElementById('status-lock-icon');
+const batteryTextEl = document.getElementById('battery-text');
+const batteryLevelEl = document.getElementById('battery-level');
+const holdSwitchEl = document.getElementById('hold-switch');
 const wheel = document.getElementById('click-wheel');
 const btnCenter = document.getElementById('btn-center');
 const btnMenu = document.getElementById('btn-menu');
@@ -52,13 +64,72 @@ const btnPrev = document.getElementById('btn-prev');
 const btnNext = document.getElementById('btn-next');
 const btnPlayPause = document.getElementById('btn-play-pause');
 
-// Применяем сохраненную подсветку при старте
 if (state.backlight) {
     screenEl.classList.add('backlight-on');
 }
 
-// --- Haptics & Authentic 1st Gen Piezo Clicker ---
-function unlockFeedback() {
+// --- PWA Service Worker & Install Prompt ---
+if ('serviceWorker' in navigator) {
+    window.addEventListener('load', () => {
+        navigator.serviceWorker.register('/sw.js').catch(() => {});
+    });
+}
+
+window.addEventListener('beforeinstallprompt', (e) => {
+    e.preventDefault();
+    deferredInstallPrompt = e;
+    if (state.currentMenu === 'settings') renderMenu('settings');
+});
+
+window.addEventListener('appinstalled', () => {
+    deferredInstallPrompt = null;
+    if (state.currentMenu === 'settings') renderMenu('settings');
+});
+
+// --- Real Battery Status API ---
+function updateBatteryUI() {
+    if (batteryLevelEl) {
+        batteryLevelEl.style.width = `${Math.max(5, state.batteryLevel)}%`;
+    }
+    if (batteryTextEl) {
+        const bolt = state.batteryCharging ? '⚡' : '';
+        const pct = state.showBatteryPercent ? `${state.batteryLevel}%` : '';
+        batteryTextEl.innerText = `${bolt}${pct}`;
+    }
+}
+
+async function initBatteryMonitor() {
+    updateBatteryUI();
+    if ('getBattery' in navigator) {
+        try {
+            const battery = await navigator.getBattery();
+            const syncBattery = () => {
+                state.batteryLevel = Math.round(battery.level * 100);
+                state.batteryCharging = Boolean(battery.charging);
+                updateBatteryUI();
+            };
+            syncBattery();
+            battery.addEventListener('levelchange', syncBattery);
+            battery.addEventListener('chargingchange', syncBattery);
+        } catch (_) {}
+    }
+}
+initBatteryMonitor();
+
+// --- Hold Switch (Hardware Lock) ---
+if (holdSwitchEl) {
+    holdSwitchEl.addEventListener('click', () => {
+        state.isHoldLocked = !state.isHoldLocked;
+        holdSwitchEl.classList.toggle('active', state.isHoldLocked);
+        if (statusLockIcon) {
+            statusLockIcon.innerText = state.isHoldLocked ? '🔒' : '';
+        }
+        playPiezoClick(true);
+    });
+}
+
+// --- Authentic 1st Gen Piezo Clicker (No Vibration) ---
+function unlockAudio() {
     if (!audioCtx) {
         const AudioContextClass = window.AudioContext || window.webkitAudioContext;
         if (AudioContextClass) {
@@ -70,10 +141,10 @@ function unlockFeedback() {
     }
 }
 
-// Синтез аутентичного механического пьезо-щелчка iPod 1st Gen
 function playPiezoClick(isButton = false) {
+    if (!state.clickerEnabled) return;
     try {
-        unlockFeedback();
+        unlockAudio();
         if (!audioCtx) return;
 
         const now = audioCtx.currentTime;
@@ -81,7 +152,6 @@ function playPiezoClick(isButton = false) {
         const filter = audioCtx.createBiquadFilter();
         const gain = audioCtx.createGain();
 
-        // Короткий импульс высокой частоты имитирует пьезодинамик внутри корпуса iPod
         osc.type = 'triangle';
         osc.frequency.setValueAtTime(isButton ? 1900 : 2600, now);
         osc.frequency.exponentialRampToValueAtTime(180, now + (isButton ? 0.012 : 0.007));
@@ -102,31 +172,13 @@ function playPiezoClick(isButton = false) {
     } catch (_) {}
 }
 
-function triggerFeedback(type = 'tick') {
-    if (state.feedbackMode === 'off') return;
-
-    const useVibe = state.feedbackMode === 'both' || state.feedbackMode === 'vibe';
-    const useSound = state.feedbackMode === 'both' || state.feedbackMode === 'sound';
-
-    if (useVibe && typeof navigator !== 'undefined' && typeof navigator.vibrate === 'function') {
-        try {
-            // На некоторых мобильных браузерах требуется сначала сбросить очередь вибрации
-            navigator.vibrate(type === 'button' ? 18 : 8);
-        } catch (_) {}
-    }
-
-    if (useSound) {
-        playPiezoClick(type === 'button');
-    }
-}
-
 // --- Click Wheel Logic ---
 let totalDragAngle = 0;
 let isDragging = false;
 let startAngle = 0;
 let lastAngle = 0;
 let angleAccumulator = 0;
-const ANGLE_THRESHOLD = 14; // Чуть более отзывчивый шаг прокрутки
+const ANGLE_THRESHOLD = 14;
 
 function getAngle(x, y) {
     const rect = wheel.getBoundingClientRect();
@@ -138,7 +190,8 @@ function getAngle(x, y) {
 }
 
 function handleStart(e) {
-    unlockFeedback();
+    unlockAudio();
+    if (state.isHoldLocked) return;
     totalDragAngle = 0;
     if (e.target.id === 'btn-center') return;
 
@@ -151,7 +204,7 @@ function handleStart(e) {
 }
 
 function handleMove(e) {
-    if (!isDragging) return;
+    if (!isDragging || state.isHoldLocked) return;
 
     const clientX = e.touches ? e.touches[0].clientX : e.clientX;
     const clientY = e.touches ? e.touches[0].clientY : e.clientY;
@@ -164,6 +217,11 @@ function handleMove(e) {
 
     angleAccumulator += deltaAngle;
     totalDragAngle += Math.abs(deltaAngle);
+
+    // Если запущена игра Brick, двигаем ракетку плавно от угла колеса
+    if (state.currentMenu === 'brick_game') {
+        moveBrickPaddle(deltaAngle * 1.4);
+    }
 
     if (Math.abs(angleAccumulator) >= ANGLE_THRESHOLD) {
         const ticks = Math.trunc(angleAccumulator / ANGLE_THRESHOLD);
@@ -188,7 +246,6 @@ function handleEnd() {
     isDragging = false;
 }
 
-// Wheel Event Listeners (passive: false на touchstart гарантирует разблокировку виброотклика!)
 wheel.addEventListener('mousedown', handleStart);
 document.addEventListener('mousemove', handleMove);
 document.addEventListener('mouseup', handleEnd);
@@ -200,10 +257,11 @@ wheel.addEventListener('touchend', handleEnd);
 // --- Button Clicks & Keyboard Support ---
 function setupButton(element, callback) {
     element.addEventListener('click', (e) => {
-        unlockFeedback();
+        unlockAudio();
+        if (state.isHoldLocked) return;
         if (totalDragAngle > 5) return;
 
-        triggerFeedback('button');
+        playPiezoClick(true);
         callback();
         e.stopPropagation();
     });
@@ -221,31 +279,33 @@ setupButton(btnPlayPause, () => {
     if (state.player) state.player.togglePlay();
 });
 
-// Управление с клавиатуры для удобства на ПК/ноутбуке
 document.addEventListener('keydown', (e) => {
-    unlockFeedback();
+    unlockAudio();
+    if (state.isHoldLocked) return;
     if (e.key === 'ArrowDown' || e.key === 'ArrowRight') {
         e.preventDefault();
+        if (state.currentMenu === 'brick_game') moveBrickPaddle(18);
         handleScroll(1);
     } else if (e.key === 'ArrowUp' || e.key === 'ArrowLeft') {
         e.preventDefault();
+        if (state.currentMenu === 'brick_game') moveBrickPaddle(-18);
         handleScroll(-1);
     } else if (e.key === 'Enter') {
         e.preventDefault();
-        triggerFeedback('button');
+        playPiezoClick(true);
         handleSelect();
     } else if (e.key === 'Backspace' || e.key === 'Escape') {
         e.preventDefault();
-        triggerFeedback('button');
+        playPiezoClick(true);
         handleMenuBack();
     } else if (e.key === ' ') {
         e.preventDefault();
-        triggerFeedback('button');
+        playPiezoClick(true);
         if (state.player) state.player.togglePlay();
     }
 });
 
-// --- UI Rendering & Menu Logic (Authentic iPod 1st Gen Structure) ---
+// --- UI Rendering & Menu Logic ---
 const VISIBLE_MENU_ROWS = 6;
 
 const menus = {
@@ -256,10 +316,24 @@ const menus = {
             { label: 'Artists', type: 'menu', target: 'artists' },
             { label: 'Albums', type: 'menu', target: 'albums' },
             { label: 'Songs', type: 'menu', target: 'songs' },
+            { label: 'Extras', type: 'menu', target: 'extras' },
+            { label: 'Settings', type: 'menu', target: 'settings' },
             { label: 'Shuffle Songs', type: 'action', action: 'shuffleAllSongs' },
             { label: 'Backlight', type: 'action', action: 'toggleBacklightQuick' },
-            { label: 'Settings', type: 'menu', target: 'settings' },
             { label: 'Now Playing', type: 'now_playing' }
+        ]
+    },
+    extras: {
+        title: 'Extras',
+        items: [
+            { label: 'Clock', type: 'clock_view' },
+            { label: 'Brick (Game)', type: 'brick_game' },
+            {
+                label: 'Sleep Timer',
+                type: 'toggle',
+                action: 'cycleSleepTimer',
+                getValue: () => state.sleepMinutes === 0 ? 'Off' : `${state.sleepMinutes}m`
+            }
         ]
     },
     settings: {
@@ -287,13 +361,20 @@ const menus = {
             {
                 label: 'Clicker',
                 type: 'toggle',
-                action: 'cycleFeedback',
-                getValue: () => ({
-                    both: 'Both',
-                    sound: 'Sound',
-                    vibe: 'Vibe',
-                    off: 'Off'
-                }[state.feedbackMode] || 'Both')
+                action: 'toggleClicker',
+                getValue: () => state.clickerEnabled ? 'On' : 'Off'
+            },
+            {
+                label: 'Battery %',
+                type: 'toggle',
+                action: 'toggleBatteryPct',
+                getValue: () => state.showBatteryPercent ? 'On' : 'Off'
+            },
+            {
+                label: 'Install App',
+                type: 'action',
+                action: 'installPWA',
+                getValue: () => (window.matchMedia('(display-mode: standalone)').matches ? 'Installed' : 'Get')
             },
             { label: 'Log Out', type: 'action', action: 'logout' }
         ]
@@ -321,6 +402,14 @@ function updateStatusPlayIcon() {
     }
 }
 
+function stopSpecialViews() {
+    if (clockInterval) {
+        clearInterval(clockInterval);
+        clockInterval = null;
+    }
+    stopBrickGame();
+}
+
 function buildMenuHTML(menu) {
     const total = menu.items.length;
     const showScrollbar = total > VISIBLE_MENU_ROWS;
@@ -328,7 +417,7 @@ function buildMenuHTML(menu) {
     let html = '<div class="menu-wrapper"><div class="menu-list-viewport"><ul class="menu-list">';
     menu.items.forEach((item, index) => {
         const isActive = index === state.selectedIndex ? 'active' : '';
-        const hasSubmenu = ['menu', 'playlist_folder', 'artist_folder', 'album_folder', 'about', 'now_playing'].includes(item.type);
+        const hasSubmenu = ['menu', 'playlist_folder', 'artist_folder', 'album_folder', 'about', 'now_playing', 'clock_view', 'brick_game'].includes(item.type);
         const arrow = hasSubmenu ? '<span class="menu-arrow">></span>' : '';
         const value = item.getValue ? `<span>${item.getValue()}</span>` : '';
 
@@ -361,6 +450,7 @@ function renderMenu(menuId, animateDir = null) {
     const menu = menus[menuId];
     if (!menu) return;
 
+    stopSpecialViews();
     state.currentMenu = menuId;
     state.isScrubbing = false;
     statusTitle.innerText = menu.title;
@@ -391,22 +481,31 @@ function renderMenu(menuId, animateDir = null) {
     }
 }
 
-function renderAbout(animateDir = null) {
+function renderAbout(animateDir = null, customMessage = null) {
+    stopSpecialViews();
     state.currentMenu = 'about';
-    statusTitle.innerText = 'About';
+    statusTitle.innerText = customMessage ? 'Install App' : 'About';
 
     const songsCount = state.savedTracksCache.length;
     const playlistsCount = menus.playlists.items.filter(i => i.type === 'playlist_folder').length;
     const albumsCount = menus.albums.items.filter(i => i.type === 'album_folder').length;
 
-    const html = `
+    const html = customMessage ? `
+        <div class="about-view">
+            <div class="about-title">Install iPodify</div>
+            <div style="text-align:center; line-height:1.35; margin:auto 0;">
+                ${customMessage}
+            </div>
+            <div style="text-align:center; font-size:11px;">Press MENU to go back</div>
+        </div>
+    ` : `
         <div class="about-view">
             <div class="about-title">${state.userName}'s iPod</div>
             <div class="about-row"><span>Songs</span><span>${songsCount}</span></div>
             <div class="about-row"><span>Albums</span><span>${albumsCount}</span></div>
             <div class="about-row"><span>Playlists</span><span>${playlistsCount}</span></div>
-            <div class="about-row"><span>Version</span><span>1.1 (2026)</span></div>
-            <div class="about-row"><span>S/N</span><span>M8541LL/A</span></div>
+            <div class="about-row"><span>Battery</span><span>${state.batteryLevel}%</span></div>
+            <div class="about-row"><span>Version</span><span>1.2 (2026)</span></div>
         </div>
     `;
 
@@ -431,7 +530,184 @@ function renderAbout(animateDir = null) {
     }
 }
 
+// --- Extras: Classic iPod Clock ---
+function renderClockView() {
+    stopSpecialViews();
+    state.currentMenu = 'clock_view';
+    statusTitle.innerText = 'Clock';
+
+    const updateClockHTML = () => {
+        if (state.currentMenu !== 'clock_view') return;
+        const now = new Date();
+        const timeStr = now.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', second: '2-digit', hour12: false });
+        const dateStr = now.toLocaleDateString([], { weekday: 'short', month: 'short', day: 'numeric', year: 'numeric' });
+        const sleepStr = state.sleepMinutes > 0 ? `<div style="font-size:11px; margin-top:6px;">⏲ Sleep: ${state.sleepMinutes}m</div>` : '';
+
+        screenContent.innerHTML = `
+            <div class="clock-view">
+                <div class="clock-time">${timeStr}</div>
+                <div class="clock-date">${dateStr}</div>
+                ${sleepStr}
+            </div>
+        `;
+    };
+
+    updateClockHTML();
+    clockInterval = setInterval(updateClockHTML, 1000);
+}
+
+// --- Extras: 1st Gen iPod Brick (Breakout) Game ---
+let brickAnimFrame = null;
+const brickState = {
+    paddleX: 110,
+    paddleW: 54,
+    paddleH: 6,
+    ballX: 140,
+    ballY: 120,
+    vx: 2.2,
+    vy: -2.2,
+    score: 0,
+    lives: 3,
+    bricks: []
+};
+
+function initBricksArray() {
+    const rows = 4;
+    const cols = 8;
+    brickState.bricks = [];
+    for (let r = 0; r < rows; r++) {
+        for (let c = 0; c < cols; c++) {
+            brickState.bricks.push({
+                x: 10 + c * 33,
+                y: 18 + r * 11,
+                w: 29,
+                h: 7,
+                alive: true
+            });
+        }
+    }
+}
+
+function moveBrickPaddle(deltaX) {
+    brickState.paddleX = Math.max(4, Math.min(280 - brickState.paddleW - 4, brickState.paddleX + deltaX));
+}
+
+function stopBrickGame() {
+    if (brickAnimFrame) {
+        cancelAnimationFrame(brickAnimFrame);
+        brickAnimFrame = null;
+    }
+}
+
+function startBrickGame() {
+    stopSpecialViews();
+    state.currentMenu = 'brick_game';
+    statusTitle.innerText = 'Brick';
+
+    screenContent.innerHTML = `<canvas id="brick-canvas" class="brick-canvas" width="280" height="186"></canvas>`;
+    const canvas = document.getElementById('brick-canvas');
+    if (!canvas) return;
+    const ctx = canvas.getContext('2d');
+
+    brickState.paddleX = 113;
+    brickState.ballX = 140;
+    brickState.ballY = 140;
+    brickState.vx = 2.1 * (Math.random() > 0.5 ? 1 : -1);
+    brickState.vy = -2.2;
+    brickState.score = 0;
+    brickState.lives = 3;
+    initBricksArray();
+
+    const loop = () => {
+        if (state.currentMenu !== 'brick_game') return;
+
+        const fg = getComputedStyle(screenEl).getPropertyValue('--screen-text').trim() || '#1f2623';
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+        ctx.fillStyle = fg;
+        ctx.font = 'bold 11px sans-serif';
+        ctx.fillText(`Score: ${brickState.score}`, 8, 12);
+        ctx.fillText(`Balls: ${brickState.lives}`, 225, 12);
+
+        // Move ball
+        brickState.ballX += brickState.vx;
+        brickState.ballY += brickState.vy;
+
+        if (brickState.ballX < 4 || brickState.ballX > canvas.width - 4) {
+            brickState.vx *= -1;
+            playPiezoClick(false);
+        }
+        if (brickState.ballY < 16) {
+            brickState.vy *= -1;
+            playPiezoClick(false);
+        }
+
+        // Paddle collision
+        const py = canvas.height - 14;
+        if (
+            brickState.ballY >= py - 3 &&
+            brickState.ballY <= py + brickState.paddleH &&
+            brickState.ballX >= brickState.paddleX &&
+            brickState.ballX <= brickState.paddleX + brickState.paddleW
+        ) {
+            brickState.vy = -Math.abs(brickState.vy);
+            const hitOffset = (brickState.ballX - (brickState.paddleX + brickState.paddleW / 2)) / (brickState.paddleW / 2);
+            brickState.vx = hitOffset * 3.1;
+            playPiezoClick(false);
+        }
+
+        // Brick collision
+        brickState.bricks.forEach(b => {
+            if (!b.alive) return;
+            if (
+                brickState.ballX >= b.x &&
+                brickState.ballX <= b.x + b.w &&
+                brickState.ballY >= b.y &&
+                brickState.ballY <= b.y + b.h
+            ) {
+                b.alive = false;
+                brickState.vy *= -1;
+                brickState.score += 10;
+                playPiezoClick(false);
+            }
+        });
+
+        if (brickState.bricks.every(b => !b.alive)) {
+            initBricksArray();
+        }
+
+        // Bottom miss
+        if (brickState.ballY > canvas.height) {
+            brickState.lives -= 1;
+            if (brickState.lives <= 0) {
+                brickState.score = 0;
+                brickState.lives = 3;
+                initBricksArray();
+            }
+            brickState.ballX = brickState.paddleX + brickState.paddleW / 2;
+            brickState.ballY = py - 8;
+            brickState.vy = -2.2;
+        }
+
+        // Draw bricks
+        brickState.bricks.forEach(b => {
+            if (b.alive) {
+                ctx.fillRect(b.x, b.y, b.w, b.h);
+            }
+        });
+
+        // Draw paddle & ball
+        ctx.fillRect(brickState.paddleX, py, brickState.paddleW, brickState.paddleH);
+        ctx.fillRect(brickState.ballX - 3, brickState.ballY - 3, 6, 6);
+
+        brickAnimFrame = requestAnimationFrame(loop);
+    };
+
+    brickAnimFrame = requestAnimationFrame(loop);
+}
+
+// --- Now Playing Screen ---
 function renderNowPlaying(animateDir = null) {
+    stopSpecialViews();
     state.currentMenu = 'now_playing';
     statusTitle.innerText = 'Now Playing';
     updateStatusPlayIcon();
@@ -439,6 +715,7 @@ function renderNowPlaying(animateDir = null) {
     const title = state.currentTrack ? state.currentTrack.name : 'Not Playing';
     const artist = state.currentTrack ? state.currentTrack.artists.map(a => a.name).join(', ') : '';
     const album = state.currentTrack ? state.currentTrack.album.name : '';
+    const isLongTitle = title.length > 24;
 
     const formatTime = (ms) => {
         const totalSeconds = Math.floor(Math.max(0, ms) / 1000);
@@ -458,10 +735,10 @@ function renderNowPlaying(animateDir = null) {
         <div class="now-playing">
             <div class="np-header">
                 <span>${trackIndexText}</span>
-                <span class="np-modes">${ state.isScrubbing ? '[Scrubbing]' : '' } ${shuffleBadge} ${repeatBadge}</span>
+                <span class="np-modes">${ state.isScrubbing ? '[Scrub]' : '' } ${shuffleBadge} ${repeatBadge}</span>
             </div>
             <div class="np-info">
-                <div class="np-title">${title}</div>
+                <div class="np-title ${isLongTitle ? 'marquee' : ''}"><span>${title}</span></div>
                 <div class="np-artist">${artist}</div>
                 <div class="np-album">${album}</div>
             </div>
@@ -509,7 +786,7 @@ function renderNowPlaying(animateDir = null) {
 }
 
 function updateActiveItem() {
-    if (state.currentMenu === 'now_playing' || state.currentMenu === 'about') return;
+    if (['now_playing', 'about', 'clock_view', 'brick_game'].includes(state.currentMenu)) return;
 
     const viewport = screenContent.querySelector('.menu-list-viewport');
     const items = screenContent.querySelectorAll('.menu-item');
@@ -533,7 +810,6 @@ function updateActiveItem() {
         }
     });
 
-    // Обновляем классический ползунок скроллбара справа
     const thumb = document.getElementById('ipod-scrollbar-thumb');
     const total = items.length;
     if (thumb && total > VISIBLE_MENU_ROWS) {
@@ -545,15 +821,14 @@ function updateActiveItem() {
 }
 
 function handleScroll(direction) {
-    if (state.currentMenu === 'about') return;
+    if (['about', 'clock_view', 'brick_game'].includes(state.currentMenu)) return;
 
     if (state.currentMenu === 'now_playing') {
         if (!state.player) return;
 
-        // Если активен режим перемотки (Scrubbing) — крутим позицию трека по 5 секунд за тик
         if (state.isScrubbing && state.duration > 0) {
             state.scrubPosition = Math.max(0, Math.min(state.duration, state.scrubPosition + direction * 5000));
-            triggerFeedback('tick');
+            playPiezoClick(false);
             renderNowPlaying();
 
             if (scrubTimeout) clearTimeout(scrubTimeout);
@@ -563,11 +838,10 @@ function handleScroll(direction) {
             return;
         }
 
-        // Обычный режим в Now Playing — регулировка громкости
         let newVolume = Math.min(1, Math.max(0, state.volume + direction * 0.05));
         state.volume = newVolume;
         state.showVolume = true;
-        triggerFeedback('tick');
+        playPiezoClick(false);
         renderNowPlaying();
 
         state.player.setVolume(newVolume).catch(() => {});
@@ -591,7 +865,7 @@ function handleScroll(direction) {
 
     if (newIndex !== state.selectedIndex) {
         state.selectedIndex = newIndex;
-        triggerFeedback('tick');
+        playPiezoClick(false);
         updateActiveItem();
     }
 }
@@ -640,8 +914,41 @@ async function toggleRepeatState() {
     }
 }
 
+function cycleSleepTimerState() {
+    const options = [0, 15, 30, 60];
+    const nextIdx = (options.indexOf(state.sleepMinutes) + 1) % options.length;
+    state.sleepMinutes = options[nextIdx];
+
+    if (sleepTimerTimeout) {
+        clearTimeout(sleepTimerTimeout);
+        sleepTimerTimeout = null;
+    }
+
+    if (state.sleepMinutes > 0) {
+        sleepTimerTimeout = setTimeout(() => {
+            if (state.player) state.player.pause();
+            state.sleepMinutes = 0;
+        }, state.sleepMinutes * 60 * 1000);
+    }
+}
+
+async function handleInstallPWA() {
+    if (deferredInstallPrompt) {
+        deferredInstallPrompt.prompt();
+        await deferredInstallPrompt.userChoice.catch(() => {});
+        deferredInstallPrompt = null;
+        renderMenu('settings');
+    } else {
+        state.menuStack.push({ id: state.currentMenu, index: state.selectedIndex });
+        const isStandalone = window.matchMedia('(display-mode: standalone)').matches;
+        const msg = isStandalone
+            ? 'iPodify is already installed as an app!'
+            : 'In browser menu tap "Install App" or "Add to Home Screen".';
+        renderAbout('right', msg);
+    }
+}
+
 function handleSelect() {
-    // В Now Playing центральная кнопка включает/фиксирует режим перемотки трека колесом (как на классическом iPod!)
     if (state.currentMenu === 'now_playing') {
         if (!state.currentTrack) return;
         if (!state.isScrubbing) {
@@ -657,7 +964,7 @@ function handleSelect() {
         return;
     }
 
-    if (state.currentMenu === 'about') {
+    if (['about', 'clock_view', 'brick_game'].includes(state.currentMenu)) {
         handleMenuBack();
         return;
     }
@@ -675,8 +982,14 @@ function handleSelect() {
     } else if (item.type === 'about') {
         state.menuStack.push({ id: state.currentMenu, index: state.selectedIndex });
         renderAbout('right');
+    } else if (item.type === 'clock_view') {
+        state.menuStack.push({ id: state.currentMenu, index: state.selectedIndex });
+        renderClockView();
+    } else if (item.type === 'brick_game') {
+        state.menuStack.push({ id: state.currentMenu, index: state.selectedIndex });
+        startBrickGame();
     } else if (item.type === 'playlist_folder') {
-        loadPlaylistTracks(item.id, item.label, item.ownerId, item.collaborative);
+        loadPlaylistTracks(item.id, item.label);
     } else if (item.type === 'artist_folder') {
         loadArtistTracks(item.id, item.label);
     } else if (item.type === 'album_folder') {
@@ -689,12 +1002,15 @@ function handleSelect() {
         state.menuStack.push({ id: state.currentMenu, index: state.selectedIndex });
         renderNowPlaying('right');
     } else if (item.type === 'toggle') {
-        if (item.action === 'cycleFeedback') {
-            const order = ['both', 'sound', 'vibe', 'off'];
-            const nextIdx = (order.indexOf(state.feedbackMode) + 1) % order.length;
-            state.feedbackMode = order[nextIdx];
+        if (item.action === 'toggleClicker') {
+            state.clickerEnabled = !state.clickerEnabled;
             savePreferences();
-            triggerFeedback('button');
+            playPiezoClick(true);
+            renderMenu(state.currentMenu);
+        } else if (item.action === 'toggleBatteryPct') {
+            state.showBatteryPercent = !state.showBatteryPercent;
+            savePreferences();
+            updateBatteryUI();
             renderMenu(state.currentMenu);
         } else if (item.action === 'toggleBacklight') {
             toggleBacklightState();
@@ -705,6 +1021,9 @@ function handleSelect() {
         } else if (item.action === 'toggleRepeat') {
             toggleRepeatState();
             renderMenu(state.currentMenu);
+        } else if (item.action === 'cycleSleepTimer') {
+            cycleSleepTimerState();
+            renderMenu(state.currentMenu);
         }
     } else if (item.type === 'action') {
         if (item.action === 'login') {
@@ -713,6 +1032,8 @@ function handleSelect() {
             toggleBacklightState();
         } else if (item.action === 'shuffleAllSongs') {
             shufflePlayAllSongs();
+        } else if (item.action === 'installPWA') {
+            handleInstallPWA();
         } else if (item.action === 'logout') {
             fetch('/logout').then(() => {
                 window.location.hash = '';
@@ -784,14 +1105,12 @@ async function fetchSpotifyAPI(endpoint) {
 }
 
 async function loadData() {
-    // 0. Профиль пользователя
     const meData = await fetchSpotifyAPI('/me');
     if (meData && meData.id) {
         state.currentUserId = meData.id;
         if (meData.display_name) state.userName = meData.display_name;
     }
 
-    // 1. Плейлисты
     const playlistsData = await fetchSpotifyAPI('/me/playlists?limit=50');
     if (playlistsData && Array.isArray(playlistsData.items)) {
         const validPlaylists = playlistsData.items.filter(p => p && p.id && p.name);
@@ -809,7 +1128,6 @@ async function loadData() {
         menus.playlists.items = [{ label: 'No Playlists', type: 'none' }];
     }
 
-    // 2. Исполнители из подписок
     const artistsData = await fetchSpotifyAPI('/me/following?type=artist&limit=50');
     if (artistsData && artistsData.artists && Array.isArray(artistsData.artists.items)) {
         const validArtists = artistsData.artists.items.filter(a => a && a.id && a.name);
@@ -825,7 +1143,6 @@ async function loadData() {
         menus.artists.items = [{ label: 'No Artists', type: 'none' }];
     }
 
-    // 3. Сохраненные альбомы (Новое меню Albums в стиле 1st Gen iPod!)
     const albumsData = await fetchSpotifyAPI('/me/albums?limit=50');
     if (albumsData && Array.isArray(albumsData.items)) {
         const validAlbums = albumsData.items
@@ -850,7 +1167,6 @@ async function loadData() {
         menus.albums.items = [{ label: 'No Albums', type: 'none' }];
     }
 
-    // 4. Сохраненные треки (Songs)
     const songsData = await fetchSpotifyAPI('/me/tracks?limit=50');
     if (songsData && Array.isArray(songsData.items)) {
         const validTracks = songsData.items
@@ -917,7 +1233,6 @@ async function loadRemainingSongsBackground(totalTracks) {
     }
 }
 
-// Загрузка треков выбранного альбома
 async function loadAlbumTracks(albumId, title, initialTracks = []) {
     const menuId = `album_${albumId}`;
     const contextUri = `spotify:album:${albumId}`;
@@ -959,7 +1274,6 @@ async function loadAlbumTracks(albumId, title, initialTracks = []) {
     if (state.currentMenu === menuId) renderMenu(menuId);
 }
 
-// Пробник очереди для чужих сохраненных плейлистов в Dev Mode
 async function probePlaylistTracksViaQueue(playlistId) {
     if (!state.accessToken || !state.deviceId || !state.player) return [];
     if (state.isPlaying) return [];
@@ -1157,13 +1471,11 @@ async function loadArtistTracks(artistId, title) {
     if (state.currentMenu === menuId) renderMenu(menuId);
 }
 
-// Shuffle Songs с главного экрана (классическая фича первого iPod)
 async function shufflePlayAllSongs() {
     if (!state.accessToken || !state.deviceId) return;
     const allUris = menus.songs.uris || [];
     if (allUris.length === 0) return;
 
-    // Перемешиваем копию массива алгоритмом Фишера-Йейтса
     const shuffled = [...allUris];
     for (let i = shuffled.length - 1; i > 0; i--) {
         const j = Math.floor(Math.random() * (i + 1));
