@@ -14,75 +14,31 @@
     <link id="dynamic-theme-css" rel="stylesheet" href="">
 </head>
 <body>
-    <!-- Скрытый SVG-фильтр преломления жидкого стекла для iOS 26 -->
-    <svg width="0" height="0" style="position:absolute; pointer-events:none;" aria-hidden="true">
+    <!-- Оптические SVG-линзы для краевого преломления жидкого стекла (Water Drop Edge Refraction) -->
+    <svg width="0" height="0" style="position:absolute; width:0; height:0; pointer-events:none;" aria-hidden="true">
         <defs>
-            <filter id="ios26-liquid-refract" x="-10%" y="-10%" width="120%" height="120%">
-                <feTurbulence type="fractalNoise" baseFrequency="0.012" numOctaves="2" result="noise" />
-                <feDisplacementMap in="SourceGraphic" in2="noise" scale="6" xChannelSelector="R" yChannelSelector="G" />
+            <!-- Карта линзы: прозрачный центр (RGB 128,128) и сильный градиент преломления по краям -->
+            <radialGradient id="water-drop-map" cx="50%" cy="50%" r="50%">
+                <stop offset="0%" stop-color="rgb(128, 128, 128)" />
+                <stop offset="72%" stop-color="rgb(128, 128, 128)" />
+                <stop offset="90%" stop-color="rgb(210, 45, 128)" />
+                <stop offset="100%" stop-color="rgb(20, 235, 128)" />
+            </radialGradient>
+
+            <filter id="ios26-edge-refract" x="-12%" y="-12%" width="124%" height="124%" color-interpolation-filters="sRGB">
+                <feTurbulence type="turbulence" baseFrequency="0.008 0.012" numOctaves="1" seed="3" result="smoothWave" />
+                <feDisplacementMap in="SourceGraphic" in2="smoothWave" scale="18" xChannelSelector="R" yChannelSelector="G" result="refracted" />
+                <feSpecularLighting in="smoothWave" surfaceScale="3" specularConstant="0.9" specularExponent="35" lighting-color="#ffffff" result="spec">
+                    <fePointLight x="120" y="-80" z="220" />
+                </feSpecularLighting>
+                <feComposite in="spec" in2="SourceAlpha" operator="in" result="specMask" />
+                <feBlend in="refracted" in2="specMask" mode="screen" />
             </filter>
         </defs>
     </svg>
 
-    <!-- Фоновая сцена для преломления сквозь жидкое стекло (активна только в теме iOS 26) -->
-    <div class="ambient-stage" id="ambient-stage" style="display: none;">
-        <div class="ambient-artwork" id="ambient-artwork"></div>
-        <div class="ambient-orb orb-1"></div>
-        <div class="ambient-orb orb-2"></div>
-        <div class="ambient-orb orb-3"></div>
-    </div>
-
-    <div class="ipod-container">
-        <div class="ipod">
-            <!-- Top Hold Switch (Classic iPod hardware detail) -->
-            <div class="hold-switch-wrapper" id="hold-switch" title="Toggle Hold Lock">
-                <span class="hold-label">HOLD</span>
-                <div class="hold-track">
-                    <div class="hold-orange"></div>
-                    <div class="hold-slider"></div>
-                </div>
-            </div>
-
-            <!-- Screen Area -->
-            <div class="screen-bezel">
-                <div class="screen" id="screen">
-                    <div class="status-bar">
-                        <span id="status-title" class="status-title-text">iPod</span>
-                        <div class="status-icons">
-                            <span id="status-lock-icon" class="status-icon"></span>
-                            <span id="status-play-icon" class="status-icon"></span>
-                            <span id="battery-text" class="battery-text"></span>
-                            <div class="battery-icon" id="battery-icon">
-                                <div class="battery-level" id="battery-level"></div>
-                            </div>
-                        </div>
-                    </div>
-
-                    <div class="screen-content" id="screen-content">
-                        <!-- Content will be injected here -->
-                    </div>
-                </div>
-            </div>
-
-            <!-- Click Wheel Area -->
-            <div class="wheel-container">
-                <div class="click-wheel" id="click-wheel">
-                    <div class="wheel-button menu-btn" id="btn-menu">MENU</div>
-                    <div class="wheel-button prev-btn" id="btn-prev">
-                        <svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor" xmlns="http://www.w3.org/2000/svg"><path d="M6 6h2v12H6zm3.5 6l8.5 6V6z"/></svg>
-                    </div>
-                    <div class="wheel-button next-btn" id="btn-next">
-                        <svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor" xmlns="http://www.w3.org/2000/svg"><path d="M6 18l8.5-6L6 6v12zM16 6v12h2V6h-2z"/></svg>
-                    </div>
-                    <div class="wheel-button play-pause-btn" id="btn-play-pause">
-                        <svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor" xmlns="http://www.w3.org/2000/svg"><path d="M8 5v14l11-7z"/></svg>
-                    </div>
-
-                    <div class="center-button" id="btn-center"></div>
-                </div>
-            </div>
-        </div>
-    </div>
+    <!-- Контейнер, в который динамически загружается layout.html выбранной темы -->
+    <div id="theme-mount"></div>
 
     <!-- Web Playback SDK & Themes -->
     <script src="https://sdk.scdn.co/spotify-player.js"></script>
