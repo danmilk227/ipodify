@@ -30,16 +30,27 @@ iPodify — это стилизованный веб-клиент и PWA-пле�
 
 ---
 
-## Как добавить собственную тему оформления
+## Как добавить собственную тему оформления (HTML + CSS)
 
-Система тем спроектирована так, чтобы добавление нового скина не требовало изменения логики `app.js`:
+Каждая тема в iPodify полностью изолирована в своей папке `src/public/themes/<theme_id>/` и имеет собственный HTML-каркас (`layout.html`), таблицы стилей (`style.css`) и, при необходимости, собственную вёрстку внутренних экранов:
 
-1. Создайте новый CSS-файл в папке `src/public/themes/`, например `src/public/themes/cyberpunk.css`.
-2. Опишите стили с префиксом `body[data-theme="cyberpunk"]` (чтобы изолировать их от других тем). Если в вашей теме нужна обложка альбома на экране плеера, задайте `.np-artwork-wrap { display: block !important; }`.
-3. Откройте `src/public/themes/registry.js` и добавьте объект вашей темы в массив `window.IPODIFY_THEMES`:
+1. Создайте папку темы, например `src/public/themes/vision/`.
+2. Создайте внутри неё `layout.html` с вашей разметкой корпуса, сохранив базовые `id` для привязки органов управления (`#screen`, `#screen-content`, `#status-title`, `#click-wheel`, `#btn-center`, `#btn-menu`, `#btn-prev`, `#btn-next`, `#btn-play-pause`, `#hold-switch`).
+3. Создайте `style.css` в этой же папке.
+4. Зарегистрируйте тему в `src/public/themes/registry.js`:
    ```javascript
    window.IPODIFY_THEMES = [
-       { id: 'classic', name: 'Classic 1G', css: null },
-       { id: 'ios26', name: 'iOS 26 Glass', css: '/themes/ios26.css' },
-       { id: 'cyberpunk', name: 'Cyberpunk', css: '/themes/cyberpunk.css' }
+       {
+           id: 'classic',
+           name: 'Classic 1G',
+           layout: '/themes/classic/layout.html',
+           css: null
+       },
+       {
+           id: 'ios26',
+           name: 'iOS 26 Glass',
+           layout: '/themes/ios26/layout.html',
+           css: '/themes/ios26/style.css',
+           renderNowPlaying: (ctx) => `...кастомный HTML экрана плеера...`
+       }
    ];
