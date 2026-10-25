@@ -1,0 +1,397 @@
+/* ==========================================================================
+   Modern Neo-Pixel 16/32-Bit (Clean Pixel Art, Pixel-Rounded Borders, 64x64 Art)
+   ========================================================================== */
+
+@import url('https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap');
+
+body[data-theme="neopixel"] {
+    background: radial-gradient(circle at 50% 35%, #181922 0%, #08090d 100%);
+    color: #e0e6f8;
+    font-family: 'Press Start 2P', monospace !important;
+    user-select: none;
+    -webkit-user-select: none;
+    overflow: hidden;
+    image-rendering: pixelated;
+    image-rendering: crisp-edges;
+}
+
+/* Корпус: матовый темный графит со ступенчатой пиксельной фаской */
+body[data-theme="neopixel"] .ipod.neopixel-device {
+    width: 350px !important;
+    height: 576px !important;
+    padding: 16px 20px 20px !important;
+    box-sizing: border-box !important;
+    border-radius: 0 !important;
+    background: #252836 !important;
+    border: 3px solid #0e0f17 !important;
+    /* Честные ступенчатые пиксельные углы через box-shadow */
+    box-shadow:
+        0 0 0 3px #3b3f54,
+        8px 8px 0px rgba(0, 0, 0, 0.75),
+        inset 3px 3px 0px rgba(255, 255, 255, 0.12),
+        inset -3px -3px 0px rgba(0, 0, 0, 0.4) !important;
+    position: relative;
+}
+
+body[data-theme="neopixel"] .neopixel-footer-label {
+    position: absolute;
+    bottom: 6px;
+    left: 0;
+    width: 100%;
+    text-align: center;
+    font-size: 6px;
+    color: #636b88;
+    letter-spacing: 0.12em;
+}
+
+/* Тумблер HOLD */
+body[data-theme="neopixel"] .neopixel-hold {
+    position: absolute;
+    top: 7px;
+    right: 28px;
+}
+
+body[data-theme="neopixel"] .hold-label {
+    color: #8c96b5 !important;
+    font-size: 7px !important;
+    font-weight: 700 !important;
+    font-family: 'Press Start 2P', monospace !important;
+}
+
+body[data-theme="neopixel"] .hold-track {
+    background: #11121a !important;
+    border: 2px solid #3b3f54 !important;
+    border-radius: 0 !important;
+    height: 9px !important;
+    width: 24px !important;
+}
+
+body[data-theme="neopixel"] .hold-orange {
+    background: #ff2a6d !important;
+}
+
+body[data-theme="neopixel"] .hold-slider {
+    background: #e0e6f8 !important;
+    border: 1px solid #11121a !important;
+    border-radius: 0 !important;
+    width: 11px !important;
+}
+
+/* Безель экрана: плотная пиксельная окантовка без кривых наложений */
+body[data-theme="neopixel"] .neopixel-screen-bezel {
+    width: 308px !important;
+    height: 236px !important;
+    background: #11121a !important;
+    border-radius: 0 !important;
+    padding: 3px !important;
+    border: 3px solid #00f0ff !important;
+    box-shadow:
+        0 0 0 2px #0a0b10,
+        3px 3px 0px rgba(0, 0, 0, 0.5) !important;
+    margin-bottom: 22px !important;
+}
+
+/* Экран: глубокий OLED-фон с пиксельной сеткой */
+body[data-theme="neopixel"] .screen.neopixel-screen {
+    --screen-text: #00f0ff;
+    width: 100% !important;
+    height: 100% !important;
+    border-radius: 0 !important;
+    background: #0d0e15 !important;
+    color: var(--screen-text) !important;
+    display: flex !important;
+    flex-direction: column !important;
+    overflow: hidden;
+    background-image: repeating-linear-gradient(
+        0deg,
+        rgba(0, 240, 255, 0.03) 0px,
+        rgba(0, 240, 255, 0.03) 2px,
+        transparent 2px,
+        transparent 4px
+    ) !important;
+}
+
+body[data-theme="neopixel"] .screen.neopixel-screen .screen-content {
+    flex: 1 1 auto !important;
+    height: calc(100% - 24px) !important;
+    display: flex !important;
+    flex-direction: column !important;
+}
+
+/* Статус-бар */
+body[data-theme="neopixel"] .status-bar.neopixel-status-bar {
+    height: 24px !important;
+    padding: 0 8px !important;
+    background: #171926 !important;
+    border-bottom: 2px solid #00f0ff !important;
+    color: #00f0ff !important;
+    font-size: 8px !important;
+    font-weight: 700 !important;
+}
+
+body[data-theme="neopixel"] .status-icon {
+    font-size: 8px !important;
+    color: #ff2a6d !important;
+}
+
+/* Пиксельная батарея */
+body[data-theme="neopixel"] .battery-icon.neopixel-battery {
+    border: 2px solid #00f0ff !important;
+    background: #0d0e15 !important;
+    border-radius: 0 !important;
+    height: 10px !important;
+    width: 22px !important;
+    padding: 1px !important;
+}
+
+body[data-theme="neopixel"] .battery-icon.neopixel-battery::after {
+    background-color: #00f0ff !important;
+    border-radius: 0 !important;
+    width: 2px !important;
+    height: 4px !important;
+    right: -4px !important;
+    top: 1px !important;
+}
+
+body[data-theme="neopixel"] .battery-level {
+    background: #00f0ff !important;
+}
+
+/* Меню */
+body[data-theme="neopixel"] .menu-list {
+    padding: 0 !important;
+}
+
+body[data-theme="neopixel"] .menu-item {
+    height: 28px !important;
+    padding: 0 10px !important;
+    font-size: 8px !important;
+    color: #a4b0d4 !important;
+    border-bottom: 1px dashed rgba(164, 176, 212, 0.2) !important;
+    font-family: 'Press Start 2P', monospace !important;
+}
+
+body[data-theme="neopixel"] .menu-item.active {
+    background: #ff2a6d !important;
+    color: #ffffff !important;
+    border-bottom: 1px solid #ff2a6d !important;
+}
+
+body[data-theme="neopixel"] .menu-item.active .menu-arrow {
+    color: #ffffff !important;
+}
+
+/* Скроллбар */
+body[data-theme="neopixel"] .ipod-scrollbar {
+    width: 7px !important;
+    background: #11121a !important;
+    border-left: 2px solid #00f0ff !important;
+}
+
+body[data-theme="neopixel"] .ipod-scrollbar-thumb {
+    background: #00f0ff !important;
+    border-radius: 0 !important;
+}
+
+/* ==========================================================================
+   Now Playing: 64x64 Hi-Color Pixel Art
+   ========================================================================== */
+.neopixel-np-view {
+    display: flex !important;
+    flex-direction: column !important;
+    justify-content: space-between !important;
+    height: 100% !important;
+    width: 100% !important;
+    padding: 8px 10px 10px !important;
+    box-sizing: border-box !important;
+    background: transparent !important;
+}
+
+.neopixel-np-main {
+    display: flex;
+    gap: 12px;
+    align-items: center;
+    width: 100%;
+    margin: auto 0 !important;
+}
+
+/* Рамка обложки */
+.neopixel-cover-wrapper {
+    position: relative;
+    width: 100px;
+    height: 100px;
+    flex-shrink: 0;
+    padding: 2px;
+    background: #11121a;
+    border: 2px solid #00f0ff;
+    box-shadow: 3px 3px 0px #ff2a6d;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.neopixel-canvas-art {
+    width: 92px;
+    height: 92px;
+    image-rendering: pixelated;
+    image-rendering: crisp-edges;
+    display: block;
+    background: #050608;
+}
+
+/* Метаданные трека */
+.neopixel-np-meta {
+    flex: 1;
+    min-width: 0;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    gap: 4px;
+}
+
+.neopixel-badge-mode {
+    font-size: 7px;
+    font-weight: 700;
+    color: #ff2a6d;
+    margin-bottom: 2px;
+}
+
+.neopixel-np-title {
+    font-size: 9px;
+    font-weight: 700;
+    color: #ffffff;
+    line-height: 1.35;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.neopixel-np-artist {
+    font-size: 8px;
+    color: #00f0ff;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.neopixel-np-album {
+    font-size: 7px;
+    color: #8f9bbd;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.neopixel-np-index {
+    font-size: 7px;
+    color: #ffe600;
+    margin-top: 4px;
+}
+
+/* Прогресс-бар */
+.neopixel-np-bottom {
+    margin-top: 0 !important;
+    width: 100%;
+}
+
+.neopixel-progress-track {
+    width: 100%;
+    height: 9px;
+    background: #11121a;
+    border: 2px solid #00f0ff;
+    border-radius: 0;
+    position: relative;
+    overflow: hidden;
+    /* Квадратные пиксельные деления */
+    background-image: repeating-linear-gradient(
+        90deg,
+        transparent,
+        transparent 5px,
+        #11121a 5px,
+        #11121a 7px
+    );
+}
+
+.neopixel-progress-fill {
+    height: 100%;
+    background: linear-gradient(90deg, #ff2a6d 0%, #05d9e8 100%);
+}
+
+.neopixel-time-row {
+    display: flex;
+    justify-content: space-between;
+    font-size: 7px;
+    font-weight: 700;
+    color: #00f0ff;
+    margin-top: 4px;
+}
+
+.neopixel-vol-row {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    padding: 2px 0;
+}
+
+.neopixel-vol-row .neopixel-progress-track {
+    flex: 1;
+}
+
+/* ==========================================================================
+   Click Wheel: Идеально круглое колесо со ступенчатой пиксельной каймой
+   ========================================================================== */
+body[data-theme="neopixel"] .wheel-container.neopixel-wheel-wrap {
+    display: flex !important;
+    justify-content: center !important;
+    align-items: center !important;
+    margin: 0 auto !important;
+    width: 220px !important;
+    height: 220px !important;
+    position: relative;
+}
+
+body[data-theme="neopixel"] .click-wheel.neopixel-wheel {
+    width: 220px !important;
+    height: 220px !important;
+    margin: 0 auto !important;
+    border-radius: 50% !important;
+    background: #171924 !important;
+    border: 3px solid #00f0ff !important;
+    box-shadow:
+        0 0 0 3px #0e0f17,
+        4px 4px 0px rgba(0, 0, 0, 0.6),
+        inset 2px 2px 0px rgba(255, 255, 255, 0.15),
+        inset -2px -2px 0px rgba(0, 0, 0, 0.4) !important;
+}
+
+body[data-theme="neopixel"] .wheel-button {
+    color: #e0e6f8 !important;
+    font-family: 'Press Start 2P', monospace !important;
+    font-size: 8px !important;
+    letter-spacing: 0.05em;
+}
+
+body[data-theme="neopixel"] .wheel-button:active {
+    color: #00f0ff !important;
+}
+
+/* Круглая центральная кнопка действия */
+body[data-theme="neopixel"] .center-button.neopixel-center-button {
+    width: 76px !important;
+    height: 76px !important;
+    border-radius: 50% !important;
+    background: #252836 !important;
+    border: 2px solid #ff2a6d !important;
+    box-shadow:
+        0 0 0 2px #0e0f17,
+        inset 2px 2px 0px rgba(255, 255, 255, 0.2),
+        inset -2px -2px 0px rgba(0, 0, 0, 0.4) !important;
+    display: flex !important;
+    align-items: center;
+    justify-content: center;
+}
+
+body[data-theme="neopixel"] .center-button.neopixel-center-button:active {
+    background: #11121a !important;
+    border-color: #00f0ff !important;
+}

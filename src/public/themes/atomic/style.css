@@ -1,0 +1,491 @@
+/* ==========================================================================
+   Clear Atomic Purple Theme (90s Translucent Tech / Nintendo & GBC aesthetic)
+   ========================================================================== */
+
+@import url('https://fonts.googleapis.com/css2?family=VT323&display=swap');
+
+body[data-theme="atomic"] {
+    background: radial-gradient(circle at 50% 35%, #251336 0%, #0d0614 100%);
+    color: #1a2217;
+    font-family: 'VT323', monospace, sans-serif;
+    user-select: none;
+    -webkit-user-select: none;
+    overflow: hidden;
+}
+
+.atomic-shell-wrap {
+    position: relative;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+/* Печатная плата (PCB) и микросхемы, просвечивающие сквозь пластик */
+.atomic-pcb-underlay {
+    position: absolute;
+    width: 326px;
+    height: 550px;
+    border-radius: 32px;
+    background: #1e1329;
+    pointer-events: none;
+    z-index: 1;
+    overflow: hidden;
+    box-shadow: inset 0 0 40px rgba(0, 0, 0, 0.85);
+}
+
+.pcb-trace {
+    position: absolute;
+    border: 1.5px solid rgba(212, 175, 55, 0.35);
+}
+.pcb-trace.trace-1 {
+    top: 40px;
+    left: 20px;
+    width: 140px;
+    height: 180px;
+    border-right: none;
+    border-top: none;
+}
+.pcb-trace.trace-2 {
+    bottom: 90px;
+    right: 25px;
+    width: 110px;
+    height: 120px;
+    border-left: none;
+    border-bottom: none;
+}
+.pcb-trace.trace-3 {
+    bottom: 50px;
+    left: 40px;
+    width: 80px;
+    height: 80px;
+    border-radius: 50%;
+    border-style: dashed;
+}
+
+.pcb-chip.wolfson-dac {
+    position: absolute;
+    bottom: 55px;
+    left: 45px;
+    width: 54px;
+    height: 54px;
+    background: #111;
+    border: 1px solid #333;
+    box-shadow: 0 2px 4px #000;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    color: #888;
+    font-size: 8px;
+    font-family: monospace;
+    letter-spacing: 0.05em;
+    transform: rotate(6deg);
+}
+
+.pcb-battery-cell {
+    position: absolute;
+    top: 70px;
+    right: 22px;
+    width: 90px;
+    height: 140px;
+    background: linear-gradient(135deg, #abb1b8 0%, #7d848c 100%);
+    border: 1px solid #5a6068;
+    border-radius: 6px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #333;
+    font-size: 10px;
+    font-weight: bold;
+    font-family: monospace;
+    opacity: 0.45;
+}
+
+/* Корпус: полупрозрачный поликарбонат Atomic Purple */
+body[data-theme="atomic"] .ipod.atomic-device {
+    width: 348px !important;
+    height: 572px !important;
+    padding: 16px 20px 22px !important;
+    box-sizing: border-box !important;
+    border-radius: 36px !important;
+    background: radial-gradient(
+        100% 100% at 30% 20%,
+        rgba(157, 78, 221, 0.58) 0%,
+        rgba(123, 44, 191, 0.65) 55%,
+        rgba(60, 9, 108, 0.82) 100%
+    ) !important;
+    backdrop-filter: blur(2.5px) !important;
+    -webkit-backdrop-filter: blur(2.5px) !important;
+    border: 2px solid rgba(224, 170, 255, 0.45) !important;
+    box-shadow:
+        0 28px 56px rgba(0, 0, 0, 0.85),
+        inset 0 2px 4px rgba(255, 255, 255, 0.45),
+        inset 0 -3px 6px rgba(0, 0, 0, 0.7) !important;
+    position: relative;
+    z-index: 2;
+}
+
+body[data-theme="atomic"] .atomic-edition-text {
+    position: absolute;
+    bottom: 6px;
+    left: 0;
+    width: 100%;
+    text-align: center;
+    font-size: 11px;
+    font-weight: 700;
+    color: rgba(224, 170, 255, 0.5);
+    letter-spacing: 0.12em;
+}
+
+/* Переключатель HOLD */
+body[data-theme="atomic"] .atomic-hold {
+    position: absolute;
+    top: 7px;
+    right: 36px;
+}
+
+body[data-theme="atomic"] .hold-label {
+    color: rgba(224, 170, 255, 0.75) !important;
+    font-weight: 800 !important;
+    font-size: 9px !important;
+}
+
+body[data-theme="atomic"] .hold-track {
+    background: rgba(30, 10, 45, 0.8) !important;
+    border: 1px solid rgba(224, 170, 255, 0.4) !important;
+    border-radius: 3px !important;
+    height: 9px !important;
+    width: 25px !important;
+}
+
+body[data-theme="atomic"] .hold-orange {
+    background: #ff0055 !important;
+}
+
+body[data-theme="atomic"] .hold-slider {
+    background: #eaecef !important;
+    border: 1px solid #fff !important;
+    border-radius: 2px !important;
+}
+
+/* Окно дисплея с рамкой цвета тёмного графита */
+body[data-theme="atomic"] .atomic-screen-bezel {
+    width: 308px !important;
+    height: 234px !important;
+    background: #2b2630 !important;
+    border-radius: 8px !important;
+    padding: 3px !important;
+    border: 1.5px solid rgba(224, 170, 255, 0.3) !important;
+    box-shadow:
+        inset 0 2px 4px rgba(0, 0, 0, 0.8),
+        0 1px 2px rgba(255, 255, 255, 0.2) !important;
+    margin-bottom: 22px !important;
+}
+
+/* Экран: оливковый ретро-LCD (Game Boy Matrix LCD) */
+body[data-theme="atomic"] .screen.atomic-screen {
+    --screen-text: #1a2217;
+    width: 100% !important;
+    height: 100% !important;
+    border-radius: 4px !important;
+    background: #9bbc0f !important;
+    color: var(--screen-text) !important;
+    display: flex !important;
+    flex-direction: column !important;
+    overflow: hidden;
+    /* Пиксельная точечная сетка матрицы */
+    background-image: repeating-linear-gradient(
+        0deg,
+        rgba(15, 56, 15, 0.08) 0px,
+        rgba(15, 56, 15, 0.08) 1px,
+        transparent 1px,
+        transparent 2px
+    ) !important;
+    box-shadow: inset 0 0 10px rgba(15, 56, 15, 0.35) !important;
+}
+
+body[data-theme="atomic"] .screen.atomic-screen .screen-content {
+    flex: 1 1 auto !important;
+    height: calc(100% - 24px) !important;
+    display: flex !important;
+    flex-direction: column !important;
+}
+
+/* Статус-бар */
+body[data-theme="atomic"] .status-bar.atomic-status-bar {
+    height: 24px !important;
+    padding: 0 8px !important;
+    background: #8bac0f !important;
+    border-bottom: 2px solid #0f380f !important;
+    color: #0f380f !important;
+    font-size: 14px !important;
+    font-weight: 700 !important;
+    letter-spacing: 0.05em;
+}
+
+body[data-theme="atomic"] .status-icon {
+    font-size: 12px !important;
+    color: #0f380f !important;
+}
+
+/* Батарея */
+body[data-theme="atomic"] .battery-icon.atomic-battery {
+    border: 1.5px solid #0f380f !important;
+    background: #9bbc0f !important;
+    border-radius: 1px !important;
+    height: 11px !important;
+    width: 23px !important;
+}
+
+body[data-theme="atomic"] .battery-icon.atomic-battery::after {
+    background-color: #0f380f !important;
+}
+
+body[data-theme="atomic"] .battery-level {
+    background: #0f380f !important;
+}
+
+/* Меню */
+body[data-theme="atomic"] .menu-list {
+    padding: 2px 0 !important;
+}
+
+body[data-theme="atomic"] .menu-item {
+    height: 28px !important;
+    padding: 0 10px !important;
+    font-size: 17px !important;
+    font-weight: 700 !important;
+    color: #0f380f !important;
+    border-bottom: 1px dotted rgba(15, 56, 15, 0.3);
+}
+
+body[data-theme="atomic"] .menu-item.active {
+    background: #0f380f !important;
+    color: #9bbc0f !important;
+    border-bottom: 1px solid #0f380f !important;
+}
+
+body[data-theme="atomic"] .menu-item.active .menu-arrow {
+    color: #9bbc0f !important;
+}
+
+/* Скроллбар */
+body[data-theme="atomic"] .ipod-scrollbar {
+    width: 7px !important;
+    background: #8bac0f !important;
+    border-left: 1.5px solid #0f380f !important;
+}
+
+body[data-theme="atomic"] .ipod-scrollbar-thumb {
+    background: #0f380f !important;
+}
+
+/* ==========================================================================
+   Уникальный Now Playing: Retro Game Boy Cartridge & Dot-Matrix Tracker
+   ========================================================================== */
+.atomic-np-view {
+    display: flex !important;
+    flex-direction: column !important;
+    justify-content: space-between !important;
+    height: 100% !important;
+    width: 100% !important;
+    padding: 8px 12px 10px !important;
+    box-sizing: border-box !important;
+    background: transparent !important;
+}
+
+.atomic-np-main {
+    display: flex;
+    gap: 12px;
+    align-items: center;
+    width: 100%;
+    margin: auto 0 !important;
+}
+
+/* Обложка в виде пластикового ретро-картриджа */
+.atomic-cover-wrapper {
+    position: relative;
+    width: 104px;
+    height: 104px;
+    flex-shrink: 0;
+    padding: 3px;
+    background: #306230;
+    border: 2px solid #0f380f;
+    box-shadow: 2px 3px 0px rgba(15, 56, 15, 0.4);
+    border-radius: 3px 3px 6px 6px;
+}
+
+.atomic-cover-img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    display: block;
+    filter: grayscale(1) contrast(1.4) sepia(1) hue-rotate(45deg);
+    border: 1px solid #0f380f;
+}
+
+.atomic-cover-empty {
+    width: 100%;
+    height: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #9bbc0f;
+    font-size: 15px;
+    font-weight: 700;
+    background: #0f380f;
+}
+
+/* Метаданные */
+.atomic-np-meta {
+    flex: 1;
+    min-width: 0;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+}
+
+.atomic-np-header-tag {
+    font-size: 13px;
+    font-weight: 700;
+    color: #306230;
+    margin-bottom: 2px;
+}
+
+.atomic-np-title {
+    font-size: 19px;
+    font-weight: 900;
+    color: #0f380f;
+    line-height: 1.1;
+    margin-bottom: 2px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.atomic-np-artist {
+    font-size: 16px;
+    font-weight: 700;
+    color: #0f380f;
+    margin-bottom: 2px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.atomic-np-album {
+    font-size: 14px;
+    color: #306230;
+    margin-bottom: 4px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.atomic-np-index {
+    font-size: 13px;
+    font-weight: 700;
+    color: #0f380f;
+}
+
+/* Нижний блок: винтажный LCD-прогресс */
+.atomic-np-bottom {
+    margin-top: 0 !important;
+    width: 100%;
+}
+
+.atomic-progress-bar {
+    width: 100%;
+    height: 10px;
+    background: #8bac0f;
+    border: 1.5px solid #0f380f;
+    border-radius: 1px;
+    position: relative;
+    overflow: hidden;
+    /* Крупные пиксельные блоки */
+    background-image: repeating-linear-gradient(
+        90deg,
+        transparent,
+        transparent 6px,
+        #9bbc0f 6px,
+        #9bbc0f 8px
+    );
+}
+
+.atomic-progress-fill {
+    height: 100%;
+    background: #0f380f;
+}
+
+.atomic-time-row {
+    display: flex;
+    justify-content: space-between;
+    font-size: 15px;
+    font-weight: 700;
+    color: #0f380f;
+    margin-top: 2px;
+}
+
+.atomic-vol-row {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 2px 0;
+}
+
+.atomic-vol-row .atomic-progress-bar {
+    flex: 1;
+}
+
+/* ==========================================================================
+   Click Wheel: Центрированное молочно-белое колесо из матового силикона
+   ========================================================================== */
+body[data-theme="atomic"] .wheel-container.atomic-wheel-wrap {
+    display: flex !important;
+    justify-content: center !important;
+    align-items: center !important;
+    margin: 0 auto !important;
+    width: 220px !important;
+    height: 220px !important;
+}
+
+body[data-theme="atomic"] .click-wheel.atomic-wheel {
+    width: 220px !important;
+    height: 220px !important;
+    margin: 0 auto !important;
+    background: radial-gradient(circle at 45% 40%, #ffffff 0%, #edeef2 60%, #d8dbe0 100%) !important;
+    border: 2px solid rgba(224, 170, 255, 0.6) !important;
+    border-radius: 50% !important;
+    box-shadow:
+        0 6px 16px rgba(0, 0, 0, 0.6),
+        inset 0 1.5px 2px rgba(255, 255, 255, 0.9),
+        inset 0 -2px 4px rgba(0, 0, 0, 0.25) !important;
+}
+
+body[data-theme="atomic"] .wheel-button {
+    color: #555c66 !important;
+    font-family: -apple-system, BlinkMacSystemFont, "Helvetica Neue", sans-serif !important;
+    font-size: 12px !important;
+    font-weight: 900 !important;
+    letter-spacing: 0.05em;
+}
+
+body[data-theme="atomic"] .wheel-button:active {
+    color: #7b2cbf !important;
+}
+
+/* Центральная кнопка: полупрозрачный леденец */
+body[data-theme="atomic"] .center-button.atomic-center-button {
+    width: 76px !important;
+    height: 76px !important;
+    background: radial-gradient(circle at 35% 30%, rgba(224, 170, 255, 0.8) 0%, rgba(123, 44, 191, 0.6) 70%, rgba(60, 9, 108, 0.8) 100%) !important;
+    border: 1.5px solid rgba(255, 255, 255, 0.7) !important;
+    box-shadow:
+        0 2px 6px rgba(0, 0, 0, 0.4),
+        inset 0 1px 2px rgba(255, 255, 255, 0.8) !important;
+}
+
+body[data-theme="atomic"] .center-button.atomic-center-button:active {
+    background: rgba(60, 9, 108, 0.95) !important;
+    box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.6) !important;
+}

@@ -1,0 +1,501 @@
+/* ==========================================================================
+   Cyberpunk 2077 / Arasaka Datapad Theme (Heavy Titanium & CRT HUD)
+   ========================================================================== */
+
+@import url('https://fonts.googleapis.com/css2?family=Chakra+Petch:wght@600;700;800&family=VT323&display=swap');
+
+body[data-theme="arasaka"] {
+    background: radial-gradient(circle at 50% 35%, #1c0303 0%, #080101 100%);
+    color: #ff003c;
+    font-family: 'Chakra Petch', monospace, sans-serif;
+    user-select: none;
+    -webkit-user-select: none;
+    overflow: hidden;
+}
+
+body[data-theme="arasaka"] .ipod.arasaka-device {
+    width: 352px !important;
+    height: 582px !important;
+    padding: 20px 20px 22px !important;
+    box-sizing: border-box !important;
+    border-radius: 12px !important;
+    background: linear-gradient(
+        145deg,
+        #353940 0%,
+        #202226 28%,
+        #141618 60%,
+        #1a1c20 85%,
+        #2a2d33 100%
+    ) !important;
+    border: 2px solid #555b66 !important;
+    box-shadow:
+        0 35px 70px rgba(0, 0, 0, 0.95),
+        0 0 25px rgba(255, 0, 60, 0.15),
+        inset 0 1.5px 2px rgba(255, 255, 255, 0.4),
+        inset 0 -2px 5px rgba(0, 0, 0, 0.9) !important;
+    position: relative;
+    clip-path: polygon(
+        16px 0%, calc(100% - 16px) 0%,
+        100% 16px, 100% calc(100% - 16px),
+        calc(100% - 16px) 100%, 16px 100%,
+        0% calc(100% - 16px), 0% 16px
+    );
+}
+
+body[data-theme="arasaka"] .arasaka-screw {
+    position: absolute;
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    background: radial-gradient(circle at 35% 35%, #9aa0a8 0%, #40444c 70%, #1a1c20 100%);
+    box-shadow: inset 0 1px 1px #fff, 0 1px 2px #000;
+}
+body[data-theme="arasaka"] .arasaka-screw.top-left { top: 8px; left: 8px; }
+body[data-theme="arasaka"] .arasaka-screw.top-right { top: 8px; right: 8px; }
+body[data-theme="arasaka"] .arasaka-screw.bottom-left { bottom: 8px; left: 8px; }
+body[data-theme="arasaka"] .arasaka-screw.bottom-right { bottom: 8px; right: 8px; }
+
+body[data-theme="arasaka"] .arasaka-hazard-band {
+    position: absolute;
+    top: 4px;
+    left: 28px;
+    right: 28px;
+    height: 12px;
+    background: repeating-linear-gradient(
+        -45deg,
+        #fcee09,
+        #fcee09 6px,
+        #000000 6px,
+        #000000 12px
+    );
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 1px;
+}
+
+body[data-theme="arasaka"] .hazard-text {
+    font-size: 7px;
+    font-weight: 800;
+    color: #000;
+    background: #fcee09;
+    padding: 0 4px;
+    letter-spacing: 0.12em;
+}
+
+body[data-theme="arasaka"] .arasaka-footer-label {
+    position: absolute;
+    bottom: 5px;
+    left: 0;
+    width: 100%;
+    text-align: center;
+    font-size: 8px;
+    font-weight: 700;
+    letter-spacing: 0.15em;
+    color: #8c939e;
+    opacity: 0.75;
+}
+
+body[data-theme="arasaka"] .arasaka-hold {
+    position: absolute;
+    top: 20px;
+    right: 24px;
+}
+
+body[data-theme="arasaka"] .hold-label {
+    color: #ff003c !important;
+    font-weight: 800 !important;
+    font-size: 8px !important;
+    letter-spacing: 0.08em;
+}
+
+body[data-theme="arasaka"] .hold-track {
+    background: #090a0c !important;
+    border: 1px solid #ff003c !important;
+    border-radius: 2px !important;
+    height: 8px !important;
+    width: 24px !important;
+}
+
+body[data-theme="arasaka"] .hold-orange {
+    background: #ff003c !important;
+}
+
+body[data-theme="arasaka"] .hold-slider {
+    background: #fcee09 !important;
+    border: 1px solid #fff !important;
+    border-radius: 1px !important;
+}
+
+body[data-theme="arasaka"] .arasaka-screen-bezel {
+    width: 310px !important;
+    height: 236px !important;
+    background: #08090a !important;
+    border-radius: 4px !important;
+    padding: 3px !important;
+    border: 1.5px solid #2e323b !important;
+    box-shadow:
+        inset 0 0 14px rgba(0, 0, 0, 0.98),
+        0 0 10px rgba(255, 0, 60, 0.25) !important;
+    margin-top: 14px !important;
+    margin-bottom: 20px !important;
+}
+
+body[data-theme="arasaka"] .screen.arasaka-screen {
+    --screen-text: #ff003c;
+    width: 100% !important;
+    height: 100% !important;
+    border-radius: 2px !important;
+    background: #060204 !important;
+    color: var(--screen-text) !important;
+    display: flex !important;
+    flex-direction: column !important;
+    overflow: hidden;
+    background-image: repeating-linear-gradient(
+        0deg,
+        rgba(255, 0, 60, 0.04) 0px,
+        rgba(255, 0, 60, 0.04) 1px,
+        transparent 1px,
+        transparent 2px
+    ) !important;
+    box-shadow: inset 0 0 20px rgba(255, 0, 60, 0.3) !important;
+}
+
+body[data-theme="arasaka"] .screen.arasaka-screen .screen-content {
+    flex: 1 1 auto !important;
+    height: calc(100% - 24px) !important;
+    display: flex !important;
+    flex-direction: column !important;
+}
+
+body[data-theme="arasaka"] .status-bar.arasaka-status-bar {
+    height: 24px !important;
+    padding: 0 8px !important;
+    background: #140206 !important;
+    border-bottom: 1.5px solid #ff003c !important;
+    color: #ff003c !important;
+    font-size: 11px !important;
+    font-weight: 800 !important;
+    letter-spacing: 0.08em;
+    text-shadow: 0 0 5px rgba(255, 0, 60, 0.8);
+}
+
+body[data-theme="arasaka"] .status-icon {
+    font-size: 10px !important;
+    color: #fcee09 !important;
+}
+
+body[data-theme="arasaka"] .battery-icon.arasaka-battery {
+    border: 1.5px solid #ff003c !important;
+    background: #120104 !important;
+    border-radius: 1px !important;
+    height: 11px !important;
+    width: 24px !important;
+    box-shadow: 0 0 6px rgba(255, 0, 60, 0.4);
+}
+
+body[data-theme="arasaka"] .battery-icon.arasaka-battery::after {
+    background-color: #ff003c !important;
+}
+
+body[data-theme="arasaka"] .battery-level {
+    background: #ff003c !important;
+    box-shadow: 0 0 8px #ff003c !important;
+}
+
+body[data-theme="arasaka"] .menu-list {
+    padding: 2px 0 !important;
+}
+
+body[data-theme="arasaka"] .menu-item {
+    height: 27px !important;
+    padding: 0 10px !important;
+    font-size: 13px !important;
+    font-weight: 700 !important;
+    color: #e0284f !important;
+    border-bottom: 1px solid rgba(255, 0, 60, 0.2);
+    letter-spacing: 0.04em;
+}
+
+body[data-theme="arasaka"] .menu-item.active {
+    background: #2b030b !important;
+    color: #ffffff !important;
+    border-left: 4px solid #fcee09 !important;
+    border-bottom: 1px solid #ff003c !important;
+    text-shadow: 0 0 8px #ff003c;
+}
+
+body[data-theme="arasaka"] .menu-item.active .menu-arrow {
+    color: #fcee09 !important;
+}
+
+body[data-theme="arasaka"] .ipod-scrollbar {
+    width: 6px !important;
+    background: #140306 !important;
+    border-left: 1px solid #4d0515 !important;
+}
+
+body[data-theme="arasaka"] .ipod-scrollbar-thumb {
+    background: #ff003c !important;
+    box-shadow: 0 0 6px #ff003c !important;
+}
+
+/* ==========================================================================
+   Уникальный Now Playing
+   ========================================================================== */
+.arasaka-np-view {
+    display: flex !important;
+    flex-direction: column !important;
+    justify-content: space-between !important;
+    height: 100% !important;
+    width: 100% !important;
+    padding: 8px 12px 10px !important;
+    box-sizing: border-box !important;
+    background: transparent !important;
+}
+
+.arasaka-np-main {
+    display: flex;
+    gap: 12px;
+    align-items: center;
+    width: 100%;
+    margin: auto 0 !important;
+}
+
+.arasaka-cover-wrapper {
+    position: relative;
+    width: 104px;
+    height: 104px;
+    flex-shrink: 0;
+    padding: 2px;
+    border: 1.5px solid #ff003c;
+    background: rgba(40, 2, 8, 0.5);
+    box-shadow: 0 0 10px rgba(255, 0, 60, 0.4);
+    clip-path: polygon(
+        8px 0%, 100% 0%,
+        100% calc(100% - 8px), calc(100% - 8px) 100%,
+        0% 100%, 0% 8px
+    );
+    overflow: hidden;
+}
+
+.arasaka-cover-wrapper::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 18px;
+    background: linear-gradient(180deg, transparent, rgba(255, 0, 60, 0.95), transparent);
+    box-shadow: 0 0 10px #ff003c;
+    animation: arasakaScan 2.4s ease-in-out infinite !important;
+    pointer-events: none;
+    z-index: 5;
+}
+
+@keyframes arasakaScan {
+    0% { transform: translateY(-20px); opacity: 0; }
+    10% { opacity: 1; }
+    90% { opacity: 1; }
+    100% { transform: translateY(110px); opacity: 0; }
+}
+
+.arasaka-cover-img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    display: block;
+    filter: contrast(1.2) saturate(1.1);
+}
+
+.arasaka-cover-empty {
+    width: 100%;
+    height: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #fcee09;
+    font-size: 11px;
+    font-weight: 800;
+    border: 1px dashed #fcee09;
+}
+
+.arasaka-np-meta {
+    flex: 1;
+    min-width: 0;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+}
+
+.arasaka-np-badge-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 2px;
+}
+
+.arasaka-badge {
+    font-size: 8px;
+    font-weight: 800;
+    color: #000;
+    background: #ff003c;
+    padding: 1px 4px;
+    border-radius: 1px;
+    letter-spacing: 0.1em;
+}
+
+.arasaka-np-title {
+    font-size: 15px;
+    font-weight: 800;
+    color: #ffffff;
+    line-height: 1.2;
+    margin-bottom: 2px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    text-shadow: 0 0 6px rgba(255, 255, 255, 0.8);
+}
+
+.arasaka-np-artist {
+    font-size: 13px;
+    font-weight: 700;
+    color: #ff003c;
+    margin-bottom: 2px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    text-shadow: 0 0 4px rgba(255, 0, 60, 0.6);
+}
+
+.arasaka-np-album {
+    font-size: 11px;
+    color: #fcee09;
+    margin-bottom: 4px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.arasaka-np-index {
+    font-size: 10px;
+    font-weight: 700;
+    color: #a8203d;
+}
+
+.arasaka-np-bottom {
+    margin-top: 0 !important;
+    width: 100%;
+}
+
+.arasaka-progress-track {
+    width: 100%;
+    height: 10px;
+    background: #140206;
+    border: 1px solid #ff003c;
+    border-radius: 1px;
+    position: relative;
+    overflow: hidden;
+    background-image: repeating-linear-gradient(
+        90deg,
+        transparent,
+        transparent 11px,
+        rgba(0, 0, 0, 0.9) 11px,
+        rgba(0, 0, 0, 0.9) 13px
+    );
+}
+
+.arasaka-progress-fill {
+    height: 100%;
+    background: linear-gradient(90deg, #ff003c 0%, #ff5500 70%, #fcee09 100%);
+    box-shadow: 0 0 10px #ff003c;
+}
+
+.arasaka-time-row {
+    display: flex;
+    justify-content: space-between;
+    font-family: 'VT323', monospace;
+    font-size: 14px;
+    font-weight: 700;
+    color: #ff003c;
+    margin-top: 2px;
+    letter-spacing: 0.1em;
+}
+
+.arasaka-vol-row {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 2px 0;
+}
+
+.arasaka-vol-row .arasaka-progress-track {
+    flex: 1;
+}
+
+/* ==========================================================================
+   Click Wheel: Центрированное размещение
+   ========================================================================== */
+body[data-theme="arasaka"] .wheel-container.arasaka-wheel-wrap {
+    display: flex !important;
+    justify-content: center !important;
+    align-items: center !important;
+    margin: 0 auto !important;
+    width: 220px !important;
+    height: 220px !important;
+}
+
+body[data-theme="arasaka"] .click-wheel.arasaka-wheel {
+    width: 220px !important;
+    height: 220px !important;
+    margin: 0 auto !important;
+    background: radial-gradient(circle at 45% 40%, #292d33 0%, #15171a 70%, #0a0b0d 100%) !important;
+    border: 2px solid #ff003c !important;
+    border-radius: 50% !important;
+    box-shadow:
+        0 6px 18px rgba(0, 0, 0, 0.9),
+        0 0 12px rgba(255, 0, 60, 0.35),
+        inset 0 1.5px 2px rgba(255, 255, 255, 0.2),
+        inset 0 -3px 6px rgba(0, 0, 0, 0.9) !important;
+}
+
+body[data-theme="arasaka"] .wheel-button {
+    color: #ff003c !important;
+    font-family: 'Chakra Petch', monospace !important;
+    font-size: 11px !important;
+    font-weight: 800 !important;
+    letter-spacing: 0.08em;
+    text-shadow: 0 0 6px rgba(255, 0, 60, 0.7);
+}
+
+body[data-theme="arasaka"] .wheel-button:active {
+    color: #fcee09 !important;
+    text-shadow: 0 0 8px #fcee09;
+}
+
+body[data-theme="arasaka"] .center-button.arasaka-center-button {
+    width: 76px !important;
+    height: 76px !important;
+    background: radial-gradient(circle at 35% 30%, #3a060f 0%, #170105 70%, #050001 100%) !important;
+    border: 2px solid #ff003c !important;
+    box-shadow:
+        0 0 10px rgba(255, 0, 60, 0.4),
+        inset 0 1px 2px rgba(252, 238, 9, 0.4) !important;
+    display: flex !important;
+    align-items: center;
+    justify-content: center;
+}
+
+body[data-theme="arasaka"] .arasaka-btn-glyph {
+    font-family: 'Chakra Petch', monospace;
+    font-size: 12px;
+    font-weight: 800;
+    color: #fcee09;
+    letter-spacing: 0.1em;
+    text-shadow: 0 0 6px #fcee09;
+}
+
+body[data-theme="arasaka"] .center-button.arasaka-center-button:active {
+    background: #000 !important;
+    box-shadow: 0 0 16px #ff003c !important;
+}

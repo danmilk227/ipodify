@@ -1,0 +1,65 @@
+<div class="ipod-container atomic-shell-wrap">
+    <!-- Видимые компоненты сквозь прозрачный пластик -->
+    <div class="atomic-pcb-underlay">
+        <div class="pcb-trace trace-1"></div>
+        <div class="pcb-trace trace-2"></div>
+        <div class="pcb-trace trace-3"></div>
+        <div class="pcb-chip wolfson-dac">
+            <span>WOLFSON</span>
+            <small>WM8731L</small>
+        </div>
+        <div class="pcb-battery-cell">
+            <span>Li-ion 3.7V</span>
+        </div>
+    </div>
+
+    <div class="ipod atomic-device">
+        <!-- Полупрозрачный ползунок HOLD -->
+        <div class="hold-switch-wrapper atomic-hold" id="hold-switch" title="Toggle Hold Lock">
+            <span class="hold-label">HOLD</span>
+            <div class="hold-track">
+                <div class="hold-orange"></div>
+                <div class="hold-slider"></div>
+            </div>
+        </div>
+
+        <!-- Окно экрана с видимой крепежной рамкой матрицы -->
+        <div class="screen-bezel atomic-screen-bezel">
+            <div class="screen atomic-screen" id="screen">
+                <div class="status-bar atomic-status-bar">
+                    <span id="status-title" class="status-title-text">GAME & MUSIC</span>
+                    <div class="status-icons">
+                        <span id="status-lock-icon" class="status-icon"></span>
+                        <span id="status-play-icon" class="status-icon"></span>
+                        <span id="battery-text" class="battery-text"></span>
+                        <div class="battery-icon atomic-battery" id="battery-icon">
+                            <div class="battery-level" id="battery-level"></div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="screen-content" id="screen-content"></div>
+            </div>
+        </div>
+
+        <!-- Матовый силиконовый Click Wheel -->
+        <div class="wheel-container atomic-wheel-wrap">
+            <div class="click-wheel atomic-wheel" id="click-wheel">
+                <div class="wheel-button menu-btn" id="btn-menu">MENU</div>
+                <div class="wheel-button prev-btn" id="btn-prev">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor"><path d="M6 6h2v12H6zm3.5 6l8.5 6V6z"/></svg>
+                </div>
+                <div class="wheel-button next-btn" id="btn-next">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor"><path d="M6 18l8.5-6L6 6v12zM16 6v12h2V6h-2z"/></svg>
+                </div>
+                <div class="wheel-button play-pause-btn" id="btn-play-pause">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor"><path d="M8 5v14l11-7z"/></svg>
+                </div>
+
+                <div class="center-button atomic-center-button" id="btn-center"></div>
+            </div>
+        </div>
+
+        <div class="atomic-edition-text">ATOMIC PURPLE // 128MB BUFFER</div>
+    </div>
+</div>

@@ -1,0 +1,447 @@
+/* ==========================================================================
+   iPod Mini / Nano 2G (Cobalt Blue Anodized Aluminum)
+   ========================================================================== */
+
+body[data-theme="nano"] {
+    background: radial-gradient(circle at 50% 35%, #0d274c 0%, #060e1c 100%);
+    color: #111a26;
+    font-family: -apple-system, BlinkMacSystemFont, "Helvetica Neue", Arial, sans-serif;
+    user-select: none;
+    -webkit-user-select: none;
+    overflow: hidden;
+}
+
+/* Форма корпуса: вытянутый анодированный алюминиевый профиль со скруглёнными боковинами */
+body[data-theme="nano"] .ipod.nano-device {
+    width: 340px !important;
+    height: 580px !important;
+    padding: 18px 20px 22px !important;
+    box-sizing: border-box !important;
+    border-radius: 28px !important;
+    background: linear-gradient(
+        90deg,
+        #053675 0%,
+        #005bb5 14%,
+        #0074e4 50%,
+        #005bb5 86%,
+        #053675 100%
+    ) !important;
+    border: 1.5px solid #004b99 !important;
+    box-shadow:
+        0 30px 60px rgba(0, 0, 0, 0.8),
+        0 6px 14px rgba(0, 0, 0, 0.5),
+        inset 0 2px 3px rgba(255, 255, 255, 0.5),
+        inset 0 -2px 4px rgba(0, 0, 0, 0.6) !important;
+    position: relative;
+    overflow: hidden;
+}
+
+/* Белые торцевые крышки сверху и снизу (визитная карточка iPod Mini / Nano) */
+body[data-theme="nano"] .nano-top-cap {
+    position: absolute;
+    top: 0;
+    left: 12px;
+    right: 12px;
+    height: 14px;
+    background: linear-gradient(180deg, #ffffff 0%, #dde2e8 100%);
+    border-bottom: 1px solid #b2bac4;
+    border-radius: 4px 4px 0 0;
+    box-shadow: inset 0 1px 1px rgba(255, 255, 255, 0.8);
+    display: flex;
+    justify-content: flex-end;
+    align-items: center;
+    padding-right: 28px;
+    z-index: 10;
+}
+
+body[data-theme="nano"] .nano-bottom-cap {
+    position: absolute;
+    bottom: 0;
+    left: 12px;
+    right: 12px;
+    height: 12px;
+    background: linear-gradient(180deg, #dde2e8 0%, #ffffff 100%);
+    border-top: 1px solid #b2bac4;
+    border-radius: 0 0 4px 4px;
+    z-index: 5;
+}
+
+/* Переключатель HOLD на верхней крышке */
+body[data-theme="nano"] .nano-hold {
+    position: relative;
+    top: 0;
+    right: 0;
+}
+
+body[data-theme="nano"] .hold-label {
+    color: #4a5460 !important;
+    font-weight: 800 !important;
+    font-size: 8px !important;
+    letter-spacing: 0.05em;
+}
+
+body[data-theme="nano"] .hold-track {
+    background: #cbd3dc !important;
+    border: 1px solid #9aa3af !important;
+    border-radius: 3px !important;
+    height: 8px !important;
+    width: 24px !important;
+}
+
+body[data-theme="nano"] .hold-orange {
+    background: #ff5500 !important;
+}
+
+body[data-theme="nano"] .hold-slider {
+    background: linear-gradient(180deg, #ffffff 0%, #a4adb8 100%) !important;
+    border: 1px solid #7c8591 !important;
+    border-radius: 2px !important;
+    width: 12px !important;
+}
+
+/* Рамка экрана */
+body[data-theme="nano"] .nano-screen-bezel {
+    width: 300px !important;
+    height: 230px !important;
+    background: #001229 !important;
+    border-radius: 6px !important;
+    padding: 3px !important;
+    border: 1px solid #003366 !important;
+    box-shadow:
+        inset 0 2px 4px rgba(0, 0, 0, 0.8),
+        0 1px 2px rgba(255, 255, 255, 0.25) !important;
+    margin-top: 6px !important;
+    margin-bottom: 24px !important;
+}
+
+/* Экран */
+body[data-theme="nano"] .screen.nano-screen {
+    --screen-text: #0e1520;
+    width: 100% !important;
+    height: 100% !important;
+    border-radius: 4px !important;
+    background: #f5f8fc !important;
+    color: var(--screen-text) !important;
+    display: flex !important;
+    flex-direction: column !important;
+    overflow: hidden;
+}
+
+body[data-theme="nano"] .screen.nano-screen .screen-content {
+    flex: 1 1 auto !important;
+    height: calc(100% - 24px) !important;
+    display: flex !important;
+    flex-direction: column !important;
+}
+
+/* Статус-бар */
+body[data-theme="nano"] .status-bar.nano-status-bar {
+    height: 24px !important;
+    padding: 0 10px !important;
+    background: linear-gradient(
+        180deg,
+        #f4f8fd 0%,
+        #dbe6f5 48%,
+        #b9cce6 52%,
+        #cde0f7 100%
+    ) !important;
+    border-bottom: 1px solid #7997be !important;
+    color: #0b2240 !important;
+    font-size: 12px !important;
+    font-weight: 700 !important;
+    text-shadow: 0 1px 0 rgba(255, 255, 255, 0.8);
+}
+
+body[data-theme="nano"] .status-icon {
+    font-size: 10px !important;
+}
+
+/* Батарея */
+body[data-theme="nano"] .battery-icon.nano-battery {
+    border: 1px solid #36557d !important;
+    background: #e9f0f9 !important;
+    border-radius: 2px !important;
+    height: 11px !important;
+    width: 22px !important;
+}
+
+body[data-theme="nano"] .battery-icon.nano-battery::after {
+    background-color: #36557d !important;
+}
+
+body[data-theme="nano"] .battery-level {
+    background: linear-gradient(180deg, #4bd63e 0%, #209916 100%) !important;
+}
+
+/* Меню */
+body[data-theme="nano"] .menu-list {
+    padding: 0 !important;
+}
+
+body[data-theme="nano"] .menu-item {
+    height: 28px !important;
+    padding: 0 12px !important;
+    font-size: 13.5px !important;
+    font-weight: 700 !important;
+    color: #111a26 !important;
+    border-bottom: 1px solid #e7edf5;
+}
+
+body[data-theme="nano"] .menu-item.active {
+    background: linear-gradient(
+        180deg,
+        #2a82f0 0%,
+        #0b66dd 48%,
+        #0050bc 52%,
+        #095ecd 100%
+    ) !important;
+    color: #ffffff !important;
+    text-shadow: 0 -1px 0 rgba(0, 0, 0, 0.5);
+    border-bottom: 1px solid #003d94 !important;
+}
+
+body[data-theme="nano"] .menu-item.active .menu-arrow {
+    color: #ffffff !important;
+}
+
+/* Скроллбар */
+body[data-theme="nano"] .ipod-scrollbar {
+    width: 9px !important;
+    background: #d8e2ee !important;
+    border-left: 1px solid #a8b9cc !important;
+}
+
+body[data-theme="nano"] .ipod-scrollbar-thumb {
+    background: linear-gradient(90deg, #0961d1 0%, #00459e 100%) !important;
+    border-radius: 2px !important;
+}
+
+/* ==========================================================================
+   Now Playing: центрированный 3D-конверт с сапфировым бегунком
+   ========================================================================== */
+.nano-np-view {
+    display: flex !important;
+    flex-direction: column !important;
+    justify-content: space-between !important;
+    height: 100% !important;
+    width: 100% !important;
+    padding: 10px 14px 12px !important;
+    box-sizing: border-box !important;
+    background: linear-gradient(180deg, #ffffff 0%, #edf3fa 100%);
+}
+
+.nano-np-main {
+    display: flex;
+    gap: 14px;
+    align-items: center;
+    width: 100%;
+    margin: auto 0 !important;
+}
+
+/* 3D-обложка альбома */
+.nano-cover-wrapper {
+    position: relative;
+    width: 108px;
+    height: 108px;
+    flex-shrink: 0;
+    perspective: 520px;
+    perspective-origin: 25% 50%;
+}
+
+.nano-cover-img {
+    width: 100px;
+    height: 100px;
+    object-fit: cover;
+    display: block;
+    border-radius: 1px;
+    transform-style: preserve-3d;
+    transform-origin: left center;
+    transform: rotateY(13deg) translateZ(0);
+    border: 1px solid rgba(0, 0, 0, 0.2);
+    box-shadow:
+        3px 4px 10px rgba(0, 0, 0, 0.3),
+        -1px 1px 3px rgba(0, 0, 0, 0.15),
+        inset 1px 0 1px rgba(255, 255, 255, 0.8);
+}
+
+.nano-cover-reflection {
+    position: absolute;
+    top: 101px;
+    left: 0;
+    width: 100px;
+    height: 38px;
+    overflow: hidden;
+    pointer-events: none;
+    transform-style: preserve-3d;
+    transform-origin: left top;
+    transform: rotateY(13deg) scaleY(-1);
+    opacity: 0.35;
+    mask-image: linear-gradient(to top, rgba(0, 0, 0, 0.85) 0%, transparent 75%);
+    -webkit-mask-image: linear-gradient(to top, rgba(0, 0, 0, 0.85) 0%, transparent 75%);
+}
+
+.nano-cover-reflection img {
+    width: 100px;
+    height: 100px;
+    object-fit: cover;
+    display: block;
+}
+
+.nano-cover-empty {
+    width: 100px;
+    height: 100px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: #d8e3ef;
+    border: 1px solid #b5c7dc;
+    transform: rotateY(13deg);
+    transform-origin: left center;
+    box-shadow: 3px 4px 10px rgba(0, 0, 0, 0.25);
+}
+
+/* Метаданные трека */
+.nano-np-meta {
+    flex: 1;
+    min-width: 0;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+}
+
+.nano-np-track-badges {
+    display: flex;
+    justify-content: flex-end;
+    gap: 5px;
+    color: #0b5ecb;
+    margin-bottom: 4px;
+}
+
+.nano-np-title {
+    font-size: 14.5px;
+    font-weight: 800;
+    color: #0d1520;
+    line-height: 1.25;
+    margin-bottom: 2px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.nano-np-artist {
+    font-size: 13px;
+    font-weight: 700;
+    color: #0050b3;
+    margin-bottom: 2px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.nano-np-album {
+    font-size: 11.5px;
+    font-weight: 500;
+    color: #55667a;
+    margin-bottom: 6px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.nano-np-index {
+    font-size: 11px;
+    font-weight: 700;
+    color: #728499;
+}
+
+/* Прогресс-бар */
+.nano-np-bottom {
+    margin-top: 0 !important;
+    width: 100%;
+}
+
+.nano-progress-bar {
+    width: 100%;
+    height: 10px;
+    background: #d3deec;
+    border: 1px solid #0050b3;
+    border-radius: 5px;
+    overflow: hidden;
+    position: relative;
+    box-shadow: inset 0 1px 2px rgba(0, 0, 0, 0.3);
+}
+
+.nano-progress-fill {
+    height: 100%;
+    background: linear-gradient(
+        180deg,
+        #3ba0ff 0%,
+        #0b72ea 48%,
+        #0055b8 52%,
+        #0a6de3 100%
+    );
+    border-radius: 4px;
+}
+
+.nano-time-row {
+    display: flex;
+    justify-content: space-between;
+    font-size: 11px;
+    font-weight: 700;
+    color: #1e334d;
+    margin-top: 4px;
+}
+
+.nano-vol-row {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 2px 0;
+}
+
+.nano-vol-row .nano-progress-bar {
+    flex: 1;
+}
+
+/* ==========================================================================
+   Click Wheel: Белый матовый пластик + Cobalt Blue кнопка
+   ========================================================================== */
+body[data-theme="nano"] .click-wheel.nano-wheel {
+    width: 216px !important;
+    height: 216px !important;
+    background: radial-gradient(circle at 40% 35%, #ffffff 0%, #ebeff5 65%, #d5dde6 100%) !important;
+    border: 1.5px solid #a9b7c6 !important;
+    border-radius: 50% !important;
+    box-shadow:
+        0 6px 14px rgba(0, 0, 0, 0.5),
+        inset 0 1.5px 2px rgba(255, 255, 255, 0.9),
+        inset 0 -3px 5px rgba(0, 0, 0, 0.2) !important;
+}
+
+body[data-theme="nano"] .wheel-button {
+    color: #5d6d80 !important;
+    font-size: 12px !important;
+    font-weight: 900 !important;
+    letter-spacing: 0.06em;
+    opacity: 0.95 !important;
+}
+
+body[data-theme="nano"] .wheel-button:active {
+    color: #0050b3 !important;
+}
+
+/* Центральная кнопка: в тон анодированного корпуса Cobalt Blue */
+body[data-theme="nano"] .center-button.nano-center-button {
+    width: 74px !important;
+    height: 74px !important;
+    background: radial-gradient(circle at 35% 30%, #007bf8 0%, #005bb5 60%, #00458a 100%) !important;
+    border: 1.5px solid #00366d !important;
+    box-shadow:
+        0 2px 6px rgba(0, 0, 0, 0.4),
+        inset 0 1px 1px rgba(255, 255, 255, 0.4) !important;
+}
+
+body[data-theme="nano"] .center-button.nano-center-button:active {
+    background: #00458a !important;
+    box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.6) !important;
+}
