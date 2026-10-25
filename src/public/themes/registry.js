@@ -1,15 +1,67 @@
 // Реестр тем оформления iPodify.
-// Каждая тема находится в своей папке /themes/<id>/ и может иметь:
-// - layout: собственный HTML-каркас устройства
-// - css: собственный файл стилей
-// - renderNowPlaying: (опционально) собственную HTML-верстку экрана плеера
-
 window.IPODIFY_THEMES = [
     {
         id: 'classic',
         name: 'Classic 1G',
         layout: '/themes/classic/layout.html',
         css: null
+    },
+    {
+        id: 'modern',
+        name: 'Classic 6G',
+        layout: '/themes/modern/layout.html',
+        css: '/themes/modern/style.css',
+        renderNowPlaying: (ctx) => {
+            const coverImg = ctx.artworkUrl
+                ? `<img class="modern-cover-img" src="${ctx.artworkUrl}" alt="Album Art" />`
+                : `<div class="modern-cover-empty">${ctx.icons.musicNote}</div>`;
+
+            const reflectionImg = ctx.artworkUrl
+                ? `<div class="modern-cover-reflection"><img src="${ctx.artworkUrl}" alt="Reflection" /></div>`
+                : '';
+
+            return `
+                <div class="modern-np-view">
+                    <div class="modern-np-main">
+                        <div class="modern-cover-wrapper">
+                            ${coverImg}
+                            ${reflectionImg}
+                        </div>
+                        <div class="modern-np-meta">
+                            <div class="modern-np-track-badges">
+                                ${ctx.isScrubbing ? '<span style="font-weight:700">[Scrub]</span>' : ''}
+                                ${ctx.shuffleIcon}
+                                ${ctx.repeatIcon}
+                            </div>
+                            <div class="modern-np-title ${ctx.isLongTitle ? 'marquee' : ''}"><span>${ctx.title}</span></div>
+                            <div class="modern-np-artist">${ctx.artist}</div>
+                            <div class="modern-np-album">${ctx.album}</div>
+                            <div class="modern-np-index">${ctx.trackIndexText}</div>
+                        </div>
+                    </div>
+
+                    <div class="modern-np-bottom">
+                        <div style="display: ${ctx.showVolume ? 'none' : 'block'}">
+                            <div class="modern-progress-bar">
+                                <div class="modern-progress-fill" style="width: ${ctx.progressPercent}%"></div>
+                            </div>
+                            <div class="modern-time-row">
+                                <span>${ctx.currentTimeFormatted}</span>
+                                <span>-${ctx.remainingTimeFormatted}</span>
+                            </div>
+                        </div>
+
+                        <div class="modern-vol-row" style="display: ${ctx.showVolume ? 'flex' : 'none'}">
+                            ${ctx.icons.volumeLow}
+                            <div class="modern-progress-bar">
+                                <div class="modern-progress-fill" style="width: ${ctx.volumePercent}%"></div>
+                            </div>
+                            ${ctx.icons.volumeHigh}
+                        </div>
+                    </div>
+                </div>
+            `;
+        }
     },
     {
         id: 'ios26',
