@@ -1,0 +1,409 @@
+/* ==========================================================================
+   iPod Classic 6th / 7th Generation (Space Gray / Matte Anodized Aluminum)
+   ========================================================================== */
+
+body[data-theme="modern"] {
+    background: radial-gradient(circle at 50% 40%, #20242a 0%, #0d0f12 100%);
+    color: #1a1a1a;
+    font-family: -apple-system, BlinkMacSystemFont, "Helvetica Neue", "Lucida Grande", Arial, sans-serif;
+    user-select: none;
+    -webkit-user-select: none;
+    overflow: hidden;
+}
+
+/* Корпус: матовый пескоструйный алюминий Space Gray со скругленными ребрами */
+body[data-theme="modern"] .ipod.modern-device {
+    width: 350px !important;
+    height: 574px !important;
+    padding: 16px 20px 22px !important;
+    box-sizing: border-box !important;
+    border-radius: 36px !important;
+    background: linear-gradient(
+        135deg,
+        #4d535b 0%,
+        #34383e 22%,
+        #2a2d32 50%,
+        #202226 78%,
+        #3b4046 100%
+    ) !important;
+    border: 1.5px solid #5a6068 !important;
+    box-shadow:
+        0 30px 60px rgba(0, 0, 0, 0.75),
+        0 6px 14px rgba(0, 0, 0, 0.5),
+        inset 0 1.5px 2px rgba(255, 255, 255, 0.35),
+        inset 0 -2px 3px rgba(0, 0, 0, 0.6) !important;
+}
+
+/* HOLD кнопка классического 6G со скошенным слайдером */
+body[data-theme="modern"] .modern-hold {
+    position: absolute;
+    top: 7px;
+    right: 38px;
+}
+
+body[data-theme="modern"] .hold-label {
+    color: #9aa1a9 !important;
+    font-weight: 700 !important;
+    font-size: 9px !important;
+    letter-spacing: 0.06em;
+}
+
+body[data-theme="modern"] .hold-track {
+    background: #1b1c1e !important;
+    border: 1px solid #4a4f55 !important;
+    border-radius: 4px !important;
+    box-shadow: inset 0 1px 3px rgba(0, 0, 0, 0.7) !important;
+}
+
+body[data-theme="modern"] .hold-orange {
+    background: #e85d04 !important;
+}
+
+body[data-theme="modern"] .hold-slider {
+    background: linear-gradient(180deg, #d3d7dc 0%, #878c93 100%) !important;
+    border: 1px solid #55595f !important;
+    border-radius: 3px !important;
+}
+
+/* Безель экрана: глубокая утопленная рамка */
+body[data-theme="modern"] .modern-screen-bezel {
+    width: 308px !important;
+    height: 234px !important;
+    background: #090a0c !important;
+    border-radius: 8px !important;
+    padding: 3px !important;
+    box-shadow:
+        inset 0 2px 4px rgba(0, 0, 0, 0.9),
+        0 1px 1px rgba(255, 255, 255, 0.15) !important;
+    margin-bottom: 24px !important;
+}
+
+/* Экран: глянцевый ЖК-дисплей 6G */
+body[data-theme="modern"] .screen.modern-screen {
+    --screen-text: #111418;
+    width: 100% !important;
+    height: 100% !important;
+    border-radius: 6px !important;
+    background: #f7f9fb !important;
+    color: var(--screen-text) !important;
+    box-shadow: inset 0 0 4px rgba(0, 0, 0, 0.2) !important;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+}
+
+/* Статус-бар в стиле фото (голубовато-серебристый градиент со стеклянным бликом) */
+body[data-theme="modern"] .status-bar.modern-status-bar {
+    height: 24px !important;
+    padding: 0 10px !important;
+    background: linear-gradient(
+        180deg,
+        #f2f5f9 0%,
+        #dbe2ec 46%,
+        #b8c4d4 50%,
+        #cad4e2 100%
+    ) !important;
+    border-bottom: 1px solid #7c8898 !important;
+    color: #1b2430 !important;
+    font-size: 12px !important;
+    font-weight: 700 !important;
+    text-shadow: 0 1px 0 rgba(255, 255, 255, 0.7);
+}
+
+body[data-theme="modern"] .status-icon {
+    font-size: 10px !important;
+}
+
+/* Батарея как на 6G: металлический контур + ярко-зеленый наполнитель */
+body[data-theme="modern"] .battery-icon.modern-battery {
+    border: 1px solid #475260 !important;
+    background: #eef2f7 !important;
+    border-radius: 2px !important;
+    height: 11px !important;
+    width: 22px !important;
+}
+
+body[data-theme="modern"] .battery-icon.modern-battery::after {
+    background-color: #475260 !important;
+}
+
+body[data-theme="modern"] .battery-level {
+    background: linear-gradient(180deg, #5fe856 0%, #2bb821 100%) !important;
+}
+
+/* Меню: градиентное синее выделение, как в прошивке iPod Classic */
+body[data-theme="modern"] .menu-list {
+    padding: 0 !important;
+}
+
+body[data-theme="modern"] .menu-item {
+    height: 28px !important;
+    padding: 0 12px !important;
+    font-size: 13.5px !important;
+    font-weight: 700 !important;
+    color: #1a1e24 !important;
+    border-bottom: 1px solid #e5e9ef;
+}
+
+body[data-theme="modern"] .menu-item.active {
+    background: linear-gradient(
+        180deg,
+        #4593f8 0%,
+        #2974e6 48%,
+        #115cd1 52%,
+        #1c6de7 100%
+    ) !important;
+    color: #ffffff !important;
+    text-shadow: 0 -1px 0 rgba(0, 0, 0, 0.45);
+    border-bottom: 1px solid #0d4ba8 !important;
+}
+
+body[data-theme="modern"] .menu-item.active .menu-arrow {
+    color: #ffffff !important;
+}
+
+/* Скроллбар iPod Classic */
+body[data-theme="modern"] .ipod-scrollbar {
+    width: 9px !important;
+    background: #dbe0e7 !important;
+    border-left: 1px solid #adb5c0 !important;
+}
+
+body[data-theme="modern"] .ipod-scrollbar-thumb {
+    background: linear-gradient(90deg, #8792a0 0%, #5d6775 100%) !important;
+    border-radius: 2px !important;
+}
+
+//* ==========================================================================
+   Экран Now Playing: сдвиг вниз + правильный 3D-разворот (iPod Classic 6G/7G)
+   ========================================================================== */
+.modern-np-view {
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+    /* Добавили отступ сверху (20px), чтобы контент опустился ниже статус-бара */
+    padding: 20px 14px 10px;
+    box-sizing: border-box;
+    justify-content: space-between;
+    background: linear-gradient(180deg, #f7f9fb 0%, #e8edf3 100%);
+}
+
+.modern-np-main {
+    display: flex;
+    gap: 14px;
+    align-items: center;
+    /* Легкий сдвиг всей рабочей зоны вниз */
+    margin-top: 4px;
+}
+
+/* 3D-сцена для обложки */
+.modern-cover-wrapper {
+    position: relative;
+    width: 108px;
+    height: 108px;
+    flex-shrink: 0;
+    perspective: 550px;
+    perspective-origin: 50% 50%;
+}
+
+/* Правильный разворот: левый край ближе, правый глубже (+28deg) */
+.modern-cover-img {
+    width: 98px;
+    height: 98px;
+    object-fit: cover;
+    display: block;
+    border-radius: 1px;
+    transform-style: preserve-3d;
+    transform-origin: center center;
+    transform: rotateY(28deg) rotateX(2deg) translateZ(0);
+    border: 1px solid rgba(255, 255, 255, 0.5);
+    box-shadow:
+        4px 4px 12px rgba(0, 0, 0, 0.35),
+        -1px 1px 3px rgba(0, 0, 0, 0.2),
+        inset 1px 0 1px rgba(255, 255, 255, 0.7);
+}
+
+/* Зеркальное отражение в той же плоскости */
+.modern-cover-reflection {
+    position: absolute;
+    top: 99px;
+    left: 0;
+    width: 98px;
+    height: 48px;
+    overflow: hidden;
+    pointer-events: none;
+    transform-style: preserve-3d;
+    transform-origin: center top;
+    transform: rotateY(28deg) rotateX(-2deg) scaleY(-1);
+    opacity: 0.35;
+    mask-image: linear-gradient(to top, rgba(0, 0, 0, 0.85) 0%, transparent 75%);
+    -webkit-mask-image: linear-gradient(to top, rgba(0, 0, 0, 0.85) 0%, transparent 75%);
+}
+
+.modern-cover-reflection img {
+    width: 98px;
+    height: 98px;
+    object-fit: cover;
+    display: block;
+}
+
+.modern-cover-empty {
+    width: 98px;
+    height: 98px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: #d6dde6;
+    border: 1px solid #b2bcc8;
+    transform: rotateY(28deg) rotateX(2deg);
+    transform-origin: center center;
+    box-shadow: 4px 4px 12px rgba(0, 0, 0, 0.25);
+}
+
+/* Метаданные трека: сдвинуты вниз на один уровень с центром обложки */
+.modern-np-meta {
+    flex: 1;
+    min-width: 0;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    padding-top: 4px;
+}
+
+.modern-np-track-badges {
+    display: flex;
+    justify-content: flex-end;
+    gap: 5px;
+    color: #4a5563;
+    margin-bottom: 4px;
+}
+
+.modern-np-title {
+    font-size: 14.5px;
+    font-weight: 800;
+    color: #11161d;
+    line-height: 1.25;
+    margin-bottom: 2px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.modern-np-artist {
+    font-size: 13px;
+    font-weight: 700;
+    color: #2b3542;
+    margin-bottom: 2px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.modern-np-album {
+    font-size: 11.5px;
+    font-weight: 500;
+    color: #556272;
+    margin-bottom: 6px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.modern-np-index {
+    font-size: 11px;
+    font-weight: 700;
+    color: #637182;
+    margin-top: 2px;
+}
+
+/* Прогресс-бар */
+.modern-np-bottom {
+    margin-top: auto;
+    padding-top: 10px;
+}
+
+.modern-progress-bar {
+    width: 100%;
+    height: 10px;
+    background: #cad2dd;
+    border: 1px solid #7c8897;
+    border-radius: 5px;
+    overflow: hidden;
+    position: relative;
+    box-shadow: inset 0 1px 2px rgba(0, 0, 0, 0.35);
+}
+
+.modern-progress-fill {
+    height: 100%;
+    background: linear-gradient(
+        180deg,
+        #5ea6ff 0%,
+        #297fee 48%,
+        #0e62d4 52%,
+        #1d75ea 100%
+    );
+    border-radius: 4px;
+}
+
+.modern-time-row {
+    display: flex;
+    justify-content: space-between;
+    font-size: 11px;
+    font-weight: 700;
+    color: #384350;
+    margin-top: 4px;
+}
+
+.modern-vol-row {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 2px 0;
+}
+
+.modern-vol-row .modern-progress-bar {
+    flex: 1;
+}
+
+/* ==========================================================================
+   Click Wheel: Тёмно-серый матовый винил с чётким кликером
+   ========================================================================== */
+body[data-theme="modern"] .click-wheel.modern-wheel {
+    width: 220px !important;
+    height: 220px !important;
+    background: #1c1d21 !important;
+    border: 1px solid #36393e !important;
+    border-radius: 50% !important;
+    box-shadow:
+        0 4px 10px rgba(0, 0, 0, 0.6),
+        inset 0 1px 2px rgba(255, 255, 255, 0.15),
+        inset 0 -2px 4px rgba(0, 0, 0, 0.8) !important;
+}
+
+body[data-theme="modern"] .wheel-button {
+    color: #e6e9ee !important;
+    font-size: 12px !important;
+    font-weight: 800 !important;
+    letter-spacing: 0.05em;
+    opacity: 0.95 !important;
+}
+
+body[data-theme="modern"] .wheel-button:active {
+    color: #8da2ba !important;
+}
+
+/* Центральная кнопка: чёрная, со скосом по окружности */
+body[data-theme="modern"] .center-button.modern-center-button {
+    width: 76px !important;
+    height: 76px !important;
+    background: linear-gradient(135deg, #2b2e34 0%, #17181c 100%) !important;
+    border: 1px solid #3a3e46 !important;
+    box-shadow:
+        0 2px 6px rgba(0, 0, 0, 0.5),
+        inset 0 1px 1px rgba(255, 255, 255, 0.2) !important;
+}
+
+body[data-theme="modern"] .center-button.modern-center-button:active {
+    background: #131417 !important;
+    box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.7) !important;
+}

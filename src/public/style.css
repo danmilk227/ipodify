@@ -3,11 +3,11 @@
     --ipod-height: 600px;
     --ipod-bg: #f8f8f8;
     --ipod-border: #e0e0e0;
-    --ipod-shadow: inset 0 0 15px rgba(0,0,0,0.1), 0 20px 40px rgba(0,0,0,0.2);
+    --ipod-shadow: inset 0 0 15px rgba(0,0,0,0.1), 0 20px 40px rgba(0,0,0,0.25);
 
     --screen-bezel-bg: #000;
-    --screen-bg: #8ba79e; /* Classic monochrome green/gray */
-    --screen-text: #222;
+    --screen-bg: #8ba79e;
+    --screen-text: #1f2623;
     --screen-width: 280px;
     --screen-height: 210px;
 
@@ -16,13 +16,7 @@
     --center-btn-bg: #f4f4f4;
     --center-btn-border: #dfdfdf;
 
-    --text-font: 'Chicago', sans-serif; /* Fallback to sans-serif */
-}
-
-/* Fallback font mimicking old Apple interfaces */
-@font-face {
-    font-family: 'Chicago';
-    src: local('Helvetica Neue'), local('Arial');
+    --text-font: 'Chicago', 'Geneva', 'Helvetica Neue', Arial, sans-serif;
 }
 
 * {
@@ -30,11 +24,12 @@
     margin: 0;
     padding: 0;
     user-select: none;
+    -webkit-user-select: none;
     -webkit-tap-highlight-color: transparent;
 }
 
 body {
-    background-color: #333;
+    background-color: #2b2b2b;
     display: flex;
     justify-content: center;
     align-items: center;
@@ -64,11 +59,70 @@ body {
     align-items: center;
     padding: 25px 0;
     position: relative;
-    /* Metal reflection effect on edges */
-    background-image: linear-gradient(135deg, rgba(255,255,255,0.8) 0%, rgba(255,255,255,0) 20%, rgba(255,255,255,0) 80%, rgba(255,255,255,0.4) 100%);
+    background-image: linear-gradient(135deg, rgba(255,255,255,0.85) 0%, rgba(255,255,255,0) 25%, rgba(255,255,255,0) 75%, rgba(255,255,255,0.4) 100%);
 }
 
-/* Responsive adjustments */
+/* Hardware Hold Switch on top right */
+.hold-switch-wrapper {
+    position: absolute;
+    top: 7px;
+    right: 36px;
+    display: flex;
+    align-items: center;
+    gap: 5px;
+    cursor: pointer;
+    z-index: 20;
+}
+
+.hold-label {
+    font-size: 9px;
+    font-weight: bold;
+    color: #888;
+    letter-spacing: 0.5px;
+}
+
+.hold-track {
+    width: 28px;
+    height: 10px;
+    background-color: #d0d0d0;
+    border-radius: 5px;
+    border: 1px solid #b5b5b5;
+    position: relative;
+    overflow: hidden;
+    box-shadow: inset 0 1px 2px rgba(0,0,0,0.2);
+}
+
+.hold-orange {
+    position: absolute;
+    left: 0;
+    top: 0;
+    width: 14px;
+    height: 100%;
+    background-color: #ff5500;
+    opacity: 0;
+    transition: opacity 0.15s ease;
+}
+
+.hold-slider {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 15px;
+    height: 100%;
+    background: linear-gradient(180deg, #fafafa, #dcdcdc);
+    border-radius: 4px;
+    border: 1px solid #aaa;
+    transition: transform 0.15s ease;
+}
+
+.hold-switch-wrapper.active .hold-orange {
+    opacity: 1;
+}
+
+.hold-switch-wrapper.active .hold-slider {
+    transform: translateX(11px);
+}
+
 @media (max-width: 400px), (max-height: 650px) {
     .ipod {
         width: 100vw;
@@ -78,6 +132,9 @@ body {
         border: none;
         padding-top: 5vh;
         background-image: none;
+    }
+    .hold-switch-wrapper {
+        top: 1.5vh;
     }
 }
 
@@ -105,8 +162,16 @@ body {
     color: var(--screen-text);
     display: flex;
     flex-direction: column;
-    /* Subtle scanline effect */
-    background-image: repeating-linear-gradient(0deg, transparent, transparent 1px, rgba(0,0,0,0.02) 1px, rgba(0,0,0,0.02) 2px);
+    transition: background-color 0.25s ease, box-shadow 0.25s ease, color 0.25s ease;
+    background-image: repeating-linear-gradient(0deg, transparent, transparent 1px, rgba(0,0,0,0.03) 1px, rgba(0,0,0,0.03) 2px);
+}
+
+.screen.backlight-on {
+    --screen-bg: #c6e6f5;
+    --screen-text: #0d1b24;
+    background-color: var(--screen-bg);
+    color: var(--screen-text);
+    box-shadow: inset 0 0 18px rgba(130, 205, 255, 0.55), 0 0 15px rgba(155, 220, 255, 0.45);
 }
 
 .status-bar {
@@ -116,11 +181,36 @@ body {
     display: flex;
     justify-content: space-between;
     align-items: center;
-    padding: 0 5px;
+    padding: 0 6px;
     font-weight: bold;
-    font-size: 14px;
+    font-size: 13px;
     background-color: var(--screen-bg);
     z-index: 10;
+    transition: background-color 0.25s ease;
+}
+
+.status-title-text {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    max-width: 155px;
+}
+
+.status-icons {
+    display: flex;
+    align-items: center;
+    gap: 5px;
+    flex-shrink: 0;
+}
+
+.status-icon {
+    font-size: 10px;
+    line-height: 1;
+}
+
+.battery-text {
+    font-size: 11px;
+    font-weight: bold;
 }
 
 .battery-icon {
@@ -129,6 +219,8 @@ body {
     border: 2px solid var(--screen-text);
     position: relative;
     padding: 1px;
+    display: flex;
+    align-items: center;
 }
 
 .battery-icon::after {
@@ -145,6 +237,7 @@ body {
     height: 100%;
     width: 80%;
     background-color: var(--screen-text);
+    transition: width 0.3s ease;
 }
 
 .screen-content {
@@ -154,19 +247,49 @@ body {
     overflow: hidden;
 }
 
-/* Menu Styles */
+/* Classic iPod Menu Layout with Right Scrollbar */
+.menu-wrapper {
+    display: flex;
+    width: 100%;
+    height: 100%;
+}
+
+.menu-list-viewport {
+    flex: 1;
+    height: 100%;
+    overflow: hidden;
+    position: relative;
+}
+
 .menu-list {
     list-style: none;
     width: 100%;
 }
 
 .menu-item {
-    padding: 6px 10px;
-    font-size: 16px;
+    height: 31px;
+    padding: 0 8px;
+    font-size: 15px;
     font-weight: bold;
     display: flex;
     justify-content: space-between;
     align-items: center;
+    white-space: nowrap;
+}
+
+.menu-item-label {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    max-width: 205px;
+}
+
+.menu-item-right {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    margin-left: 6px;
+    flex-shrink: 0;
 }
 
 .menu-item.active {
@@ -176,6 +299,25 @@ body {
 
 .menu-arrow {
     font-size: 12px;
+    font-weight: bold;
+}
+
+/* Classic 1st Gen Scrollbar */
+.ipod-scrollbar {
+    width: 8px;
+    height: 100%;
+    border-left: 2px solid var(--screen-text);
+    padding: 1px;
+    position: relative;
+    flex-shrink: 0;
+}
+
+.ipod-scrollbar-thumb {
+    width: 100%;
+    background-color: var(--screen-text);
+    position: absolute;
+    left: 0;
+    min-height: 12px;
 }
 
 /* Now Playing Styles */
@@ -183,25 +325,36 @@ body {
     display: flex;
     flex-direction: column;
     height: 100%;
-    padding: 10px;
+    padding: 6px 10px 8px 10px;
 }
 
 .np-header {
     display: flex;
-    font-size: 12px;
-    margin-bottom: 10px;
+    justify-content: space-between;
+    align-items: center;
+    font-size: 11px;
+    font-weight: bold;
+    margin-bottom: 6px;
+}
+
+.np-modes {
+    display: flex;
+    gap: 5px;
 }
 
 .np-info {
     flex: 1;
     display: flex;
     flex-direction: column;
+    justify-content: center;
     align-items: center;
     text-align: center;
+    overflow: hidden;
+    width: 100%;
 }
 
 .np-title {
-    font-size: 16px;
+    font-size: 15px;
     font-weight: bold;
     margin-bottom: 4px;
     white-space: nowrap;
@@ -210,8 +363,23 @@ body {
     width: 100%;
 }
 
+.np-title.marquee {
+    text-overflow: clip;
+}
+
+.np-title.marquee span {
+    display: inline-block;
+    padding-left: 20px;
+    animation: ipodMarquee 9s linear infinite;
+}
+
+@keyframes ipodMarquee {
+    0%, 15% { transform: translateX(0); }
+    85%, 100% { transform: translateX(-65%); }
+}
+
 .np-artist, .np-album {
-    font-size: 14px;
+    font-size: 13px;
     margin-bottom: 2px;
     white-space: nowrap;
     overflow: hidden;
@@ -230,6 +398,7 @@ body {
     border: 2px solid var(--screen-text);
     margin-bottom: 4px;
     position: relative;
+    padding: 1px;
 }
 
 .np-progress-fill {
@@ -238,13 +407,106 @@ body {
     width: 0%;
 }
 
+.np-scrub-diamond {
+    position: absolute;
+    top: -4px;
+    width: 8px;
+    height: 8px;
+    background-color: var(--screen-text);
+    transform: translateX(-50%) rotate(45deg);
+    border: 1px solid var(--screen-bg);
+}
+
 .np-time {
     display: flex;
     justify-content: space-between;
+    font-size: 11px;
+    font-weight: bold;
+}
+
+/* Volume bar */
+.np-volume-container {
+    margin-top: auto;
+    width: 100%;
+    display: none;
+    align-items: center;
+    gap: 6px;
+    padding-bottom: 6px;
+}
+
+.np-vol-icon {
     font-size: 12px;
     font-weight: bold;
 }
 
+.np-volume-bar-wrapper {
+    flex: 1;
+    height: 12px;
+    border: 2px solid var(--screen-text);
+    padding: 1px;
+    display: flex;
+}
+
+.np-volume-fill {
+    height: 100%;
+    background-color: var(--screen-text);
+    width: 0%;
+}
+
+/* About, Clock & Brick Game Views */
+.about-view {
+    padding: 8px 10px;
+    font-size: 13px;
+    font-weight: bold;
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+    justify-content: space-between;
+}
+
+.about-title {
+    text-align: center;
+    font-size: 15px;
+    border-bottom: 2px solid var(--screen-text);
+    padding-bottom: 4px;
+    margin-bottom: 4px;
+}
+
+.about-row {
+    display: flex;
+    justify-content: space-between;
+    margin: 2px 0;
+}
+
+.clock-view {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    height: 100%;
+    padding: 10px;
+    text-align: center;
+}
+
+.clock-time {
+    font-size: 38px;
+    font-weight: bold;
+    letter-spacing: 1px;
+    border: 2px solid var(--screen-text);
+    padding: 6px 14px;
+    margin-bottom: 8px;
+}
+
+.clock-date {
+    font-size: 14px;
+    font-weight: bold;
+}
+
+.brick-canvas {
+    width: 100%;
+    height: 100%;
+    display: block;
+}
 
 /* CLICK WHEEL AREA */
 .wheel-container {
@@ -265,7 +527,7 @@ body {
     justify-content: center;
     align-items: center;
     cursor: pointer;
-    touch-action: none; /* Prevent browser scrolling on wheel */
+    touch-action: none;
 }
 
 .center-button {
@@ -288,83 +550,46 @@ body {
     position: absolute;
     font-family: 'Helvetica Neue', Arial, sans-serif;
     font-weight: bold;
-    font-size: 14px;
-    color: #a0a0a0;
+    font-size: 13px;
+    color: #999;
     z-index: 2;
     display: flex;
     justify-content: center;
     align-items: center;
-    width: 40px;
-    height: 40px;
+    width: 48px;
+    height: 44px;
 }
 
-.menu-btn {
-    top: 15px;
-}
+.menu-btn { top: 12px; }
+.prev-btn { left: 12px; }
+.next-btn { right: 12px; }
+.play-pause-btn { bottom: 12px; }
 
-.prev-btn {
-    left: 15px;
-}
-
-.next-btn {
-    right: 15px;
-}
-
-.play-pause-btn {
-    bottom: 15px;
-}
-
-/* Button active states */
-.click-wheel:active .menu-btn:hover,
-.click-wheel:active .prev-btn:hover,
-.click-wheel:active .next-btn:hover,
-.click-wheel:active .play-pause-btn:hover {
-    color: #777;
+.wheel-button:active {
+    color: #555;
 }
 
 /* Animation utilities */
-.slide-in-right {
-    animation: slideInRight 0.2s forwards;
-}
-
-.slide-out-left {
-    animation: slideOutLeft 0.2s forwards;
-}
-
-.slide-in-left {
-    animation: slideInLeft 0.2s forwards;
-}
-
-.slide-out-right {
-    animation: slideOutRight 0.2s forwards;
-}
+.slide-in-right { animation: slideInRight 0.18s forwards; }
+.slide-out-left { animation: slideOutLeft 0.18s forwards; }
+.slide-in-left { animation: slideInLeft 0.18s forwards; }
+.slide-out-right { animation: slideOutRight 0.18s forwards; }
 
 @keyframes slideInRight {
     from { transform: translateX(100%); }
     to { transform: translateX(0); }
 }
-
 @keyframes slideOutLeft {
     from { transform: translateX(0); }
     to { transform: translateX(-100%); }
 }
-
 @keyframes slideInLeft {
     from { transform: translateX(-100%); }
     to { transform: translateX(0); }
 }
-
 @keyframes slideOutRight {
     from { transform: translateX(0); }
     to { transform: translateX(100%); }
-}
-
-/* Screen overlay for transition */
-.screen-transition-container {
-    position: relative;
-    width: 100%;
-    height: 100%;
-    overflow: hidden;
 }
 
 .screen-view {
