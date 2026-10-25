@@ -174,14 +174,15 @@ body[data-theme="modern"] .ipod-scrollbar-thumb {
     border-radius: 2px !important;
 }
 
-/* ==========================================================================
-   Экран Now Playing: в точности по фото с Black Eyed Peas
+//* ==========================================================================
+   Экран Now Playing: сдвиг вниз + правильный 3D-разворот (iPod Classic 6G/7G)
    ========================================================================== */
 .modern-np-view {
     display: flex;
     flex-direction: column;
     height: 100%;
-    padding: 10px 14px 10px;
+    /* Добавили отступ сверху (20px), чтобы контент опустился ниже статус-бара */
+    padding: 20px 14px 10px;
     box-sizing: border-box;
     justify-content: space-between;
     background: linear-gradient(180deg, #f7f9fb 0%, #e8edf3 100%);
@@ -189,87 +190,84 @@ body[data-theme="modern"] .ipod-scrollbar-thumb {
 
 .modern-np-main {
     display: flex;
-    gap: 12px;
-    align-items: flex-start;
+    gap: 14px;
+    align-items: center;
+    /* Легкий сдвиг всей рабочей зоны вниз */
+    margin-top: 4px;
 }
 
-/* ==========================================================================
-   3D Cover Art с разворотом и зеркальным полом (iPod Classic 6G/7G)
-   ========================================================================== */
-
-/* Контейнер сцены с перспективой */
+/* 3D-сцена для обложки */
 .modern-cover-wrapper {
     position: relative;
-    width: 106px;
-    height: 106px;
+    width: 108px;
+    height: 108px;
     flex-shrink: 0;
-    perspective: 480px;
-    perspective-origin: 30% 50%;
-    margin-left: 2px;
+    perspective: 550px;
+    perspective-origin: 50% 50%;
 }
 
-/* Сама обложка в 3D: повернута вправо, с толстым корешком слева */
+/* Правильный разворот: левый край ближе, правый глубже (+28deg) */
 .modern-cover-img {
-    width: 102px;
-    height: 102px;
+    width: 98px;
+    height: 98px;
     object-fit: cover;
     display: block;
     border-radius: 1px;
     transform-style: preserve-3d;
-    transform: rotateY(-14deg) rotateX(2deg) translateZ(0);
-    transform-origin: left center;
-    border: 1px solid rgba(255, 255, 255, 0.4);
-    /* Тень и эффект толщины конверта диска */
+    transform-origin: center center;
+    transform: rotateY(28deg) rotateX(2deg) translateZ(0);
+    border: 1px solid rgba(255, 255, 255, 0.5);
     box-shadow:
-        -3px 2px 5px rgba(0, 0, 0, 0.45),
-        2px 6px 12px rgba(0, 0, 0, 0.35),
-        inset 1px 0 1px rgba(255, 255, 255, 0.6);
+        4px 4px 12px rgba(0, 0, 0, 0.35),
+        -1px 1px 3px rgba(0, 0, 0, 0.2),
+        inset 1px 0 1px rgba(255, 255, 255, 0.7);
 }
 
-/* Зеркальное отражение обложки вниз строго в той же 3D-плоскости */
+/* Зеркальное отражение в той же плоскости */
 .modern-cover-reflection {
     position: absolute;
-    top: 104px;
+    top: 99px;
     left: 0;
-    width: 102px;
+    width: 98px;
     height: 48px;
     overflow: hidden;
     pointer-events: none;
     transform-style: preserve-3d;
-    transform-origin: left top;
-    transform: rotateY(-14deg) rotateX(-2deg) scaleY(-1);
-    opacity: 0.38;
-    mask-image: linear-gradient(to top, rgba(0, 0, 0, 0.85) 0%, transparent 80%);
-    -webkit-mask-image: linear-gradient(to top, rgba(0, 0, 0, 0.85) 0%, transparent 80%);
+    transform-origin: center top;
+    transform: rotateY(28deg) rotateX(-2deg) scaleY(-1);
+    opacity: 0.35;
+    mask-image: linear-gradient(to top, rgba(0, 0, 0, 0.85) 0%, transparent 75%);
+    -webkit-mask-image: linear-gradient(to top, rgba(0, 0, 0, 0.85) 0%, transparent 75%);
 }
 
 .modern-cover-reflection img {
-    width: 102px;
-    height: 102px;
+    width: 98px;
+    height: 98px;
     object-fit: cover;
     display: block;
 }
 
 .modern-cover-empty {
-    width: 102px;
-    height: 102px;
+    width: 98px;
+    height: 98px;
     display: flex;
     align-items: center;
     justify-content: center;
     background: #d6dde6;
     border: 1px solid #b2bcc8;
-    transform: rotateY(-14deg) rotateX(2deg);
-    transform-origin: left center;
-    box-shadow: -3px 2px 6px rgba(0, 0, 0, 0.35);
+    transform: rotateY(28deg) rotateX(2deg);
+    transform-origin: center center;
+    box-shadow: 4px 4px 12px rgba(0, 0, 0, 0.25);
 }
 
-/* Метаданные трека: справа от обложки, как на оригинальном экране */
+/* Метаданные трека: сдвинуты вниз на один уровень с центром обложки */
 .modern-np-meta {
     flex: 1;
     min-width: 0;
     display: flex;
     flex-direction: column;
-    padding-top: 2px;
+    justify-content: center;
+    padding-top: 4px;
 }
 
 .modern-np-track-badges {
@@ -315,13 +313,13 @@ body[data-theme="modern"] .ipod-scrollbar-thumb {
     font-size: 11px;
     font-weight: 700;
     color: #637182;
-    margin-top: 4px;
+    margin-top: 2px;
 }
 
-/* Прогресс-бар: глянцевый синий бегунок с таймерами по краям */
+/* Прогресс-бар */
 .modern-np-bottom {
     margin-top: auto;
-    padding-top: 14px;
+    padding-top: 10px;
 }
 
 .modern-progress-bar {
@@ -356,7 +354,6 @@ body[data-theme="modern"] .ipod-scrollbar-thumb {
     margin-top: 4px;
 }
 
-/* Регулятор громкости */
 .modern-vol-row {
     display: flex;
     align-items: center;
