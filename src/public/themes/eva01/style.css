@@ -1,0 +1,475 @@
+/* ==========================================================================
+   Cyberpunk / EVA-01 NERV Tactical Terminal Theme
+   ========================================================================== */
+
+@import url('https://fonts.googleapis.com/css2?family=Share+Tech+Mono&family=Orbitron:wght@700;900&display=swap');
+
+body[data-theme="eva01"] {
+    background: radial-gradient(circle at 50% 35%, #150529 0%, #05000a 100%);
+    color: #39ff14;
+    font-family: 'Share Tech Mono', monospace, sans-serif;
+    user-select: none;
+    -webkit-user-select: none;
+    overflow: hidden;
+}
+
+/* Корпус: матовый EVA-01 фиолетовый композит со скошенными углами и защитными ребрами */
+body[data-theme="eva01"] .ipod.eva-device {
+    width: 350px !important;
+    height: 578px !important;
+    padding: 16px 20px 22px !important;
+    box-sizing: border-box !important;
+    border-radius: 24px !important;
+    background: linear-gradient(
+        135deg,
+        #3b1166 0%,
+        #22073d 25%,
+        #18032b 55%,
+        #28084a 80%,
+        #3c1366 100%
+    ) !important;
+    border: 2px solid #581c91 !important;
+    box-shadow:
+        0 30px 60px rgba(0, 0, 0, 0.9),
+        0 0 20px rgba(57, 255, 20, 0.12),
+        inset 0 1.5px 2px rgba(255, 115, 0, 0.5),
+        inset 0 -2px 4px rgba(0, 0, 0, 0.8) !important;
+    position: relative;
+    clip-path: polygon(
+        12px 0%, calc(100% - 12px) 0%,
+        100% 12px, 100% calc(100% - 12px),
+        calc(100% - 12px) 100%, 12px 100%,
+        0% calc(100% - 12px), 0% 12px
+    );
+}
+
+/* Индустриальная предупреждающая полоса */
+body[data-theme="eva01"] .eva-hazard-stripe {
+    position: absolute;
+    top: 0;
+    left: 20px;
+    right: 20px;
+    height: 3px;
+    background: repeating-linear-gradient(
+        -45deg,
+        #ff7700,
+        #ff7700 8px,
+        #111111 8px,
+        #111111 16px
+    );
+    opacity: 0.85;
+}
+
+body[data-theme="eva01"] .eva-unit-tag {
+    position: absolute;
+    bottom: 5px;
+    left: 0;
+    width: 100%;
+    text-align: center;
+    font-family: 'Orbitron', monospace;
+    font-size: 8px;
+    font-weight: 900;
+    letter-spacing: 0.25em;
+    color: #ff7700;
+    opacity: 0.7;
+}
+
+/* Переключатель SAFETY */
+body[data-theme="eva01"] .eva-hold {
+    position: absolute;
+    top: 7px;
+    right: 36px;
+}
+
+body[data-theme="eva01"] .hold-label {
+    color: #ff7700 !important;
+    font-family: 'Orbitron', sans-serif !important;
+    font-weight: 900 !important;
+    font-size: 8px !important;
+    letter-spacing: 0.08em;
+}
+
+body[data-theme="eva01"] .hold-track {
+    background: #0b0214 !important;
+    border: 1px solid #ff7700 !important;
+    border-radius: 2px !important;
+    height: 9px !important;
+    width: 26px !important;
+}
+
+body[data-theme="eva01"] .hold-orange {
+    background: #39ff14 !important;
+}
+
+body[data-theme="eva01"] .hold-slider {
+    background: #ff7700 !important;
+    border: 1px solid #fff !important;
+    border-radius: 1px !important;
+}
+
+/* Визор экрана */
+body[data-theme="eva01"] .eva-screen-bezel {
+    width: 308px !important;
+    height: 236px !important;
+    background: #040108 !important;
+    border-radius: 6px !important;
+    padding: 3px !important;
+    border: 1.5px solid #ff7700 !important;
+    box-shadow:
+        inset 0 0 12px rgba(0, 0, 0, 0.95),
+        0 0 8px rgba(255, 119, 0, 0.35) !important;
+    margin-bottom: 20px !important;
+}
+
+/* Экран терминала MAGI: чёрный фон со сканлайнами и неоново-зеленым свечением */
+body[data-theme="eva01"] .screen.eva-screen {
+    --screen-text: #39ff14;
+    width: 100% !important;
+    height: 100% !important;
+    border-radius: 4px !important;
+    background: #030804 !important;
+    color: var(--screen-text) !important;
+    display: flex !important;
+    flex-direction: column !important;
+    overflow: hidden;
+    background-image: repeating-linear-gradient(
+        0deg,
+        rgba(0, 0, 0, 0.4) 0px,
+        rgba(0, 0, 0, 0.4) 1px,
+        transparent 1px,
+        transparent 2px
+    ) !important;
+    box-shadow: inset 0 0 18px rgba(57, 255, 20, 0.2) !important;
+}
+
+body[data-theme="eva01"] .screen.eva-screen .screen-content {
+    flex: 1 1 auto !important;
+    height: calc(100% - 24px) !important;
+    display: flex !important;
+    flex-direction: column !important;
+}
+
+/* Статус-бар терминала */
+body[data-theme="eva01"] .status-bar.eva-status-bar {
+    height: 24px !important;
+    padding: 0 8px !important;
+    background: #0a1f0d !important;
+    border-bottom: 1px solid #39ff14 !important;
+    color: #39ff14 !important;
+    font-family: 'Orbitron', monospace !important;
+    font-size: 11px !important;
+    font-weight: 900 !important;
+    letter-spacing: 0.08em;
+    text-shadow: 0 0 6px rgba(57, 255, 20, 0.7);
+}
+
+body[data-theme="eva01"] .status-icon {
+    font-size: 10px !important;
+    color: #ff7700 !important;
+}
+
+/* Батарея: сегментный энергоблок NERV */
+body[data-theme="eva01"] .battery-icon.eva-battery {
+    border: 1px solid #39ff14 !important;
+    background: #020a03 !important;
+    border-radius: 1px !important;
+    height: 11px !important;
+    width: 24px !important;
+    box-shadow: 0 0 4px rgba(57, 255, 20, 0.4);
+}
+
+body[data-theme="eva01"] .battery-icon.eva-battery::after {
+    background-color: #39ff14 !important;
+}
+
+body[data-theme="eva01"] .battery-level {
+    background: #39ff14 !important;
+    box-shadow: 0 0 6px #39ff14 !important;
+}
+
+/* Меню терминала */
+body[data-theme="eva01"] .menu-list {
+    padding: 2px 0 !important;
+}
+
+body[data-theme="eva01"] .menu-item {
+    height: 27px !important;
+    padding: 0 10px !important;
+    font-size: 13px !important;
+    font-weight: 700 !important;
+    color: #2bd40e !important;
+    border-bottom: 1px dashed rgba(57, 255, 20, 0.2);
+    letter-spacing: 0.04em;
+}
+
+body[data-theme="eva01"] .menu-item.active {
+    background: #113816 !important;
+    color: #ffffff !important;
+    border-left: 4px solid #ff7700 !important;
+    border-bottom: 1px solid #39ff14 !important;
+    text-shadow: 0 0 8px #39ff14;
+}
+
+body[data-theme="eva01"] .menu-item.active .menu-arrow {
+    color: #ff7700 !important;
+}
+
+/* Скроллбар */
+body[data-theme="eva01"] .ipod-scrollbar {
+    width: 6px !important;
+    background: #051407 !important;
+    border-left: 1px solid #1f5e26 !important;
+}
+
+body[data-theme="eva01"] .ipod-scrollbar-thumb {
+    background: #39ff14 !important;
+    box-shadow: 0 0 5px #39ff14 !important;
+}
+
+/* ==========================================================================
+   Уникальный экран Now Playing: MAGI Synchro-Monitor
+   ========================================================================== */
+.eva-np-view {
+    display: flex !important;
+    flex-direction: column !important;
+    justify-content: space-between !important;
+    height: 100% !important;
+    width: 100% !important;
+    padding: 10px 12px 10px !important;
+    box-sizing: border-box !important;
+    background: transparent !important;
+}
+
+.eva-np-main {
+    display: flex;
+    gap: 12px;
+    align-items: center;
+    width: 100%;
+    margin: auto 0 !important;
+}
+
+/* Голографический оптический прицел обложки */
+.eva-cover-wrapper {
+    position: relative;
+    width: 104px;
+    height: 104px;
+    flex-shrink: 0;
+    padding: 2px;
+    border: 1px solid #39ff14;
+    background: rgba(10, 35, 15, 0.4);
+    box-shadow: 0 0 8px rgba(57, 255, 20, 0.3);
+}
+
+/* Угловые визиры NERV */
+.eva-cover-wrapper::before {
+    content: '';
+    position: absolute;
+    top: -3px;
+    left: -3px;
+    width: 8px;
+    height: 8px;
+    border-top: 2px solid #ff7700;
+    border-left: 2px solid #ff7700;
+}
+
+.eva-cover-wrapper::after {
+    content: '';
+    position: absolute;
+    bottom: -3px;
+    right: -3px;
+    width: 8px;
+    height: 8px;
+    border-bottom: 2px solid #ff7700;
+    border-right: 2px solid #ff7700;
+}
+
+.eva-cover-img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    display: block;
+    filter: contrast(1.15) saturate(1.2);
+}
+
+.eva-cover-empty {
+    width: 100%;
+    height: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #ff7700;
+    font-family: 'Orbitron', monospace;
+    font-size: 11px;
+    border: 1px dashed #ff7700;
+}
+
+/* Метаданные потока */
+.eva-np-meta {
+    flex: 1;
+    min-width: 0;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+}
+
+.eva-np-tagline {
+    font-family: 'Orbitron', monospace;
+    font-size: 9px;
+    font-weight: 700;
+    color: #ff7700;
+    letter-spacing: 0.1em;
+    margin-bottom: 2px;
+}
+
+.eva-np-title {
+    font-size: 14.5px;
+    font-weight: 900;
+    color: #ffffff;
+    line-height: 1.2;
+    margin-bottom: 3px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    text-shadow: 0 0 6px rgba(255, 255, 255, 0.6);
+}
+
+.eva-np-artist {
+    font-size: 13px;
+    font-weight: 700;
+    color: #39ff14;
+    margin-bottom: 2px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    text-shadow: 0 0 4px rgba(57, 255, 20, 0.5);
+}
+
+.eva-np-album {
+    font-size: 11px;
+    color: #ff7700;
+    margin-bottom: 4px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.eva-np-status-row {
+    display: flex;
+    justify-content: space-between;
+    font-size: 10px;
+    color: #2bd40e;
+    margin-top: 3px;
+}
+
+/* Тактический индикатор прогресса */
+.eva-np-bottom {
+    margin-top: 0 !important;
+    width: 100%;
+}
+
+.eva-progress-track {
+    width: 100%;
+    height: 8px;
+    background: #021105;
+    border: 1px solid #1f5e26;
+    border-radius: 1px;
+    position: relative;
+    overflow: hidden;
+}
+
+.eva-progress-fill {
+    height: 100%;
+    background: linear-gradient(90deg, #ff7700 0%, #39ff14 70%, #00ffff 100%);
+    box-shadow: 0 0 8px rgba(57, 255, 20, 0.8);
+}
+
+.eva-time-row {
+    display: flex;
+    justify-content: space-between;
+    font-family: 'Share Tech Mono', monospace;
+    font-size: 11px;
+    font-weight: 700;
+    color: #39ff14;
+    margin-top: 4px;
+    letter-spacing: 0.05em;
+}
+
+.eva-vol-row {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 2px 0;
+}
+
+.eva-vol-row .eva-progress-track {
+    flex: 1;
+}
+
+/* ==========================================================================
+   Click Wheel: Тёмно-графитовый диск с кислотно-зелёными маркировками
+   ========================================================================== */
+body[data-theme="eva01"] .click-wheel.eva-wheel {
+    width: 220px !important;
+    height: 220px !important;
+    background: radial-gradient(circle at 45% 40%, #1a1622 0%, #0e0a14 70%, #07040a 100%) !important;
+    border: 2px solid #ff7700 !important;
+    border-radius: 50% !important;
+    box-shadow:
+        0 6px 16px rgba(0, 0, 0, 0.8),
+        0 0 10px rgba(255, 119, 0, 0.3),
+        inset 0 1px 2px rgba(255, 255, 255, 0.15),
+        inset 0 -2px 6px rgba(0, 0, 0, 0.9) !important;
+}
+
+body[data-theme="eva01"] .wheel-button {
+    color: #39ff14 !important;
+    font-family: 'Orbitron', monospace !important;
+    font-size: 11px !important;
+    font-weight: 900 !important;
+    letter-spacing: 0.08em;
+    text-shadow: 0 0 6px rgba(57, 255, 20, 0.6);
+}
+
+body[data-theme="eva01"] .wheel-button:active {
+    color: #ff7700 !important;
+    text-shadow: 0 0 6px #ff7700;
+}
+
+/* Центральная кнопка: EVA-01 Core */
+body[data-theme="eva01"] .center-button.eva-center-button {
+    width: 76px !important;
+    height: 76px !important;
+    background: radial-gradient(circle at 40% 35%, #2a0c47 0%, #150326 65%, #080010 100%) !important;
+    border: 2px solid #39ff14 !important;
+    box-shadow:
+        0 0 8px rgba(57, 255, 20, 0.4),
+        inset 0 1px 2px rgba(255, 119, 0, 0.5) !important;
+    display: flex !important;
+    align-items: center;
+    justify-content: center;
+}
+
+body[data-theme="eva01"] .eva-center-glyph {
+    font-family: 'Orbitron', monospace;
+    font-size: 13px;
+    font-weight: 900;
+    color: #ff7700;
+    letter-spacing: 0.1em;
+    text-shadow: 0 0 5px #ff7700;
+}
+
+body[data-theme="eva01"] .center-button.eva-center-button:active {
+    background: #080010 !important;
+    box-shadow: 0 0 14px #ff7700 !important;
+}
+
+/* Fix Click Wheel centering */
+body[data-theme="eva01"] .wheel-container.eva-wheel-wrap {
+    display: flex !important;
+    justify-content: center !important;
+    align-items: center !important;
+    margin: 0 auto !important;
+}
+body[data-theme="eva01"] .click-wheel.eva-wheel {
+    margin: 0 auto !important;
+}

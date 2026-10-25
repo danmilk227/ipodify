@@ -1,0 +1,433 @@
+/* ==========================================================================
+   8-Bit Pixel Art Theme (Retro Handheld / GameBoy & Chiptune Aesthetic)
+   ========================================================================== */
+
+@import url('https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap');
+
+body[data-theme="pixel"] {
+    background: radial-gradient(circle at 50% 35%, #2a2c36 0%, #0d0e12 100%);
+    color: #0f380f;
+    font-family: 'Press Start 2P', monospace, monospace !important;
+    user-select: none;
+    -webkit-user-select: none;
+    overflow: hidden;
+    image-rendering: pixelated;
+    image-rendering: crisp-edges;
+}
+
+/* Корпус: матовый серый ретро-пластик с крупными пиксельными углами */
+body[data-theme="pixel"] .ipod.pixel-device {
+    width: 350px !important;
+    height: 580px !important;
+    padding: 16px 20px 22px !important;
+    box-sizing: border-box !important;
+    border-radius: 0px !important;
+    background: #c4c8d4 !important;
+    border: 4px solid #1a1c24 !important;
+    box-shadow:
+        10px 10px 0px rgba(0, 0, 0, 0.7),
+        inset -4px -4px 0px #8f95a5,
+        inset 4px 4px 0px #ffffff !important;
+    position: relative;
+    clip-path: polygon(
+        0 12px, 12px 12px, 12px 0,
+        calc(100% - 12px) 0, calc(100% - 12px) 12px, 100% 12px,
+        100% calc(100% - 12px), calc(100% - 12px) calc(100% - 12px), calc(100% - 12px) 100%,
+        12px 100%, 12px calc(100% - 12px), 0 calc(100% - 12px)
+    );
+}
+
+body[data-theme="pixel"] .pixel-badge {
+    position: absolute;
+    top: 6px;
+    left: 20px;
+    font-size: 7px;
+    font-weight: 700;
+    color: #4a5163;
+    letter-spacing: 0.05em;
+}
+
+body[data-theme="pixel"] .pixel-footer-label {
+    position: absolute;
+    bottom: 6px;
+    left: 0;
+    width: 100%;
+    text-align: center;
+    font-size: 6px;
+    color: #636b80;
+    letter-spacing: 0.1em;
+}
+
+/* Тумблер POWER / HOLD */
+body[data-theme="pixel"] .pixel-hold {
+    position: absolute;
+    top: 6px;
+    right: 28px;
+}
+
+body[data-theme="pixel"] .hold-label {
+    color: #1a1c24 !important;
+    font-size: 7px !important;
+    font-weight: 700 !important;
+    font-family: 'Press Start 2P', monospace !important;
+}
+
+body[data-theme="pixel"] .hold-track {
+    background: #8f95a5 !important;
+    border: 2px solid #1a1c24 !important;
+    border-radius: 0px !important;
+    height: 10px !important;
+    width: 26px !important;
+}
+
+body[data-theme="pixel"] .hold-orange {
+    background: #e60012 !important;
+}
+
+body[data-theme="pixel"] .hold-slider {
+    background: #ffffff !important;
+    border: 2px solid #1a1c24 !important;
+    border-radius: 0px !important;
+    width: 12px !important;
+}
+
+/* Рамка экрана: тёмно-серая ступенька */
+body[data-theme="pixel"] .pixel-screen-bezel {
+    width: 308px !important;
+    height: 236px !important;
+    background: #686e80 !important;
+    border-radius: 0px !important;
+    padding: 6px !important;
+    border: 3px solid #1a1c24 !important;
+    box-shadow: inset 3px 3px 0px #4a5163, inset -3px -3px 0px #8f95a5 !important;
+    margin-top: 10px !important;
+    margin-bottom: 20px !important;
+}
+
+/* Экран: оливково-зелёный Dot-Matrix LCD */
+body[data-theme="pixel"] .screen.pixel-screen {
+    --screen-text: #0f380f;
+    width: 100% !important;
+    height: 100% !important;
+    border-radius: 0px !important;
+    background: #9bbc0f !important;
+    color: var(--screen-text) !important;
+    display: flex !important;
+    flex-direction: column !important;
+    overflow: hidden;
+    border: 2px solid #0f380f !important;
+    box-shadow: inset 2px 2px 0px rgba(15, 56, 15, 0.3) !important;
+    /* Квадратная точечная пиксельная сетка */
+    background-image: repeating-linear-gradient(
+        0deg,
+        rgba(15, 56, 15, 0.08) 0px,
+        rgba(15, 56, 15, 0.08) 2px,
+        transparent 2px,
+        transparent 4px
+    ) !important;
+}
+
+body[data-theme="pixel"] .screen.pixel-screen .screen-content {
+    flex: 1 1 auto !important;
+    height: calc(100% - 24px) !important;
+    display: flex !important;
+    flex-direction: column !important;
+}
+
+/* Статус-бар */
+body[data-theme="pixel"] .status-bar.pixel-status-bar {
+    height: 24px !important;
+    padding: 0 8px !important;
+    background: #8bac0f !important;
+    border-bottom: 2px solid #0f380f !important;
+    color: #0f380f !important;
+    font-size: 8px !important;
+    font-weight: 700 !important;
+}
+
+body[data-theme="pixel"] .status-icon {
+    font-size: 8px !important;
+}
+
+/* Пиксельная батарейка */
+body[data-theme="pixel"] .battery-icon.pixel-battery {
+    border: 2px solid #0f380f !important;
+    background: #9bbc0f !important;
+    border-radius: 0px !important;
+    height: 10px !important;
+    width: 22px !important;
+    padding: 1px !important;
+}
+
+body[data-theme="pixel"] .battery-icon.pixel-battery::after {
+    background-color: #0f380f !important;
+    border-radius: 0px !important;
+    width: 2px !important;
+    height: 4px !important;
+    right: -4px !important;
+    top: 1px !important;
+}
+
+body[data-theme="pixel"] .battery-level {
+    background: #0f380f !important;
+}
+
+/* Пиксельное меню */
+body[data-theme="pixel"] .menu-list {
+    padding: 0 !important;
+}
+
+body[data-theme="pixel"] .menu-item {
+    height: 28px !important;
+    padding: 0 8px !important;
+    font-size: 8px !important;
+    color: #0f380f !important;
+    border-bottom: 1px dashed rgba(15, 56, 15, 0.3) !important;
+    font-family: 'Press Start 2P', monospace !important;
+}
+
+body[data-theme="pixel"] .menu-item.active {
+    background: #0f380f !important;
+    color: #9bbc0f !important;
+    border-bottom: 1px solid #0f380f !important;
+}
+
+body[data-theme="pixel"] .menu-item.active .menu-arrow {
+    color: #9bbc0f !important;
+}
+
+/* Скроллбар */
+body[data-theme="pixel"] .ipod-scrollbar {
+    width: 8px !important;
+    background: #8bac0f !important;
+    border-left: 2px solid #0f380f !important;
+}
+
+body[data-theme="pixel"] .ipod-scrollbar-thumb {
+    background: #0f380f !important;
+    border-radius: 0px !important;
+}
+
+/* ==========================================================================
+   Уникальный Now Playing: 8-Bit Pixel Art Player
+   ========================================================================== */
+.pixel-np-view {
+    display: flex !important;
+    flex-direction: column !important;
+    justify-content: space-between !important;
+    height: 100% !important;
+    width: 100% !important;
+    padding: 8px 10px !important;
+    box-sizing: border-box !important;
+    background: transparent !important;
+}
+
+.pixel-np-main {
+    display: flex;
+    gap: 12px;
+    align-items: center;
+    width: 100%;
+    margin: auto 0 !important;
+}
+
+/* Холст пиксель-арта обложки */
+.pixel-cover-wrapper {
+    position: relative;
+    width: 96px;
+    height: 96px;
+    flex-shrink: 0;
+    padding: 2px;
+    background: #8bac0f;
+    border: 2px solid #0f380f;
+    box-shadow: 3px 3px 0px rgba(15, 56, 15, 0.35);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.pixel-canvas-art {
+    width: 88px;
+    height: 88px;
+    image-rendering: pixelated;
+    image-rendering: crisp-edges;
+    display: block;
+    background: #0f380f;
+    border: 1px solid #0f380f;
+}
+
+/* Пиксельные метаданные */
+.pixel-np-meta {
+    flex: 1;
+    min-width: 0;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    gap: 3px;
+}
+
+.pixel-badge-mode {
+    font-size: 7px;
+    font-weight: 700;
+    color: #306230;
+    margin-bottom: 2px;
+}
+
+.pixel-np-title {
+    font-size: 9px;
+    font-weight: 700;
+    color: #0f380f;
+    line-height: 1.35;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.pixel-np-artist {
+    font-size: 8px;
+    color: #306230;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.pixel-np-album {
+    font-size: 7px;
+    color: #306230;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.pixel-np-index {
+    font-size: 7px;
+    color: #0f380f;
+    margin-top: 4px;
+}
+
+/* Пиксельный прогресс-бар */
+.pixel-np-bottom {
+    margin-top: 0 !important;
+    width: 100%;
+}
+
+.pixel-progress-track {
+    width: 100%;
+    height: 10px;
+    background: #8bac0f;
+    border: 2px solid #0f380f;
+    border-radius: 0px;
+    position: relative;
+    overflow: hidden;
+    /* Квадратные пиксельные деления */
+    background-image: repeating-linear-gradient(
+        90deg,
+        transparent,
+        transparent 5px,
+        #0f380f 5px,
+        #0f380f 7px
+    );
+}
+
+.pixel-progress-fill {
+    height: 100%;
+    background: #0f380f;
+}
+
+.pixel-time-row {
+    display: flex;
+    justify-content: space-between;
+    font-size: 7px;
+    font-weight: 700;
+    color: #0f380f;
+    margin-top: 4px;
+}
+
+.pixel-vol-row {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    padding: 2px 0;
+}
+
+.pixel-vol-row .pixel-progress-track {
+    flex: 1;
+}
+
+/* ==========================================================================
+   Click Wheel: Пиксельное ступенчатое колесо D-Pad
+   ========================================================================== */
+body[data-theme="pixel"] .wheel-container.pixel-wheel-wrap {
+    display: flex !important;
+    justify-content: center !important;
+    align-items: center !important;
+    margin: 0 auto !important;
+    width: 220px !important;
+    height: 220px !important;
+}
+
+body[data-theme="pixel"] .click-wheel.pixel-wheel {
+    width: 220px !important;
+    height: 220px !important;
+    margin: 0 auto !important;
+    border-radius: 0px !important;
+    background: #4a5163 !important;
+    border: 4px solid #1a1c24 !important;
+    box-shadow:
+        8px 8px 0px rgba(0, 0, 0, 0.6),
+        inset 4px 4px 0px #686e80,
+        inset -4px -4px 0px #2a2c36 !important;
+    clip-path: polygon(
+        0 24px, 24px 24px, 24px 0,
+        calc(100% - 24px) 0, calc(100% - 24px) 24px, 100% 24px,
+        100% calc(100% - 24px), calc(100% - 24px) calc(100% - 24px), calc(100% - 24px) 100%,
+        24px 100%, 24px calc(100% - 24px), 0 calc(100% - 24px)
+    );
+}
+
+body[data-theme="pixel"] .wheel-button {
+    color: #ffffff !important;
+    font-family: 'Press Start 2P', monospace !important;
+    font-size: 8px !important;
+    letter-spacing: 0.05em;
+    text-shadow: 2px 2px 0px #1a1c24;
+}
+
+body[data-theme="pixel"] .wheel-button:active {
+    color: #9bbc0f !important;
+}
+
+/* Центральная красная кнопка действия (GameBoy B/A Button) */
+body[data-theme="pixel"] .center-button.pixel-center-button {
+    width: 74px !important;
+    height: 74px !important;
+    border-radius: 0px !important;
+    background: #e60012 !important;
+    border: 3px solid #1a1c24 !important;
+    box-shadow:
+        4px 4px 0px rgba(0, 0, 0, 0.5),
+        inset 3px 3px 0px #ff4d5a,
+        inset -3px -3px 0px #8a000b !important;
+    display: flex !important;
+    align-items: center;
+    justify-content: center;
+    clip-path: polygon(
+        0 8px, 8px 8px, 8px 0,
+        calc(100% - 8px) 0, calc(100% - 8px) 8px, 100% 8px,
+        100% calc(100% - 8px), calc(100% - 8px) calc(100% - 8px), calc(100% - 8px) 100%,
+        8px 100%, 8px calc(100% - 8px), 0 calc(100% - 8px)
+    );
+}
+
+body[data-theme="pixel"] .pixel-a-btn {
+    font-family: 'Press Start 2P', monospace;
+    font-size: 13px;
+    font-weight: 700;
+    color: #ffffff;
+    text-shadow: 2px 2px 0px #8a000b;
+}
+
+body[data-theme="pixel"] .center-button.pixel-center-button:active {
+    background: #8a000b !important;
+    box-shadow: inset 3px 3px 0px #000 !important;
+    transform: translate(2px, 2px);
+}

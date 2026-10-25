@@ -1,0 +1,461 @@
+/* ==========================================================================
+   Braun T3 / Dieter Rams Functionalist Theme (Less, but better)
+   ========================================================================== */
+
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800;900&display=swap');
+
+body[data-theme="braun"] {
+    background: radial-gradient(circle at 50% 35%, #3d3b38 0%, #171615 100%);
+    color: #111111;
+    font-family: 'Inter', -apple-system, BlinkMacSystemFont, "Helvetica Neue", sans-serif;
+    user-select: none;
+    -webkit-user-select: none;
+    overflow: hidden;
+}
+
+/* Корпус: матовый молочно-серый ABS-пластик без блеска и без глянца */
+body[data-theme="braun"] .ipod.braun-device {
+    width: 348px !important;
+    height: 576px !important;
+    padding: 16px 20px 22px !important;
+    box-sizing: border-box !important;
+    border-radius: 18px !important;
+    background: #e5e3de !important;
+    border: 1.5px solid #cac7c0 !important;
+    box-shadow:
+        0 30px 60px rgba(0, 0, 0, 0.75),
+        0 6px 14px rgba(0, 0, 0, 0.4),
+        inset 0 1px 2px rgba(255, 255, 255, 0.9),
+        inset 0 -2px 3px rgba(0, 0, 0, 0.15) !important;
+    position: relative;
+}
+
+/* Фирменная перфорация динамика Braun */
+body[data-theme="braun"] .braun-speaker-grille {
+    position: absolute;
+    top: 18px;
+    left: 20px;
+    display: flex;
+    flex-direction: column;
+    gap: 3px;
+}
+
+body[data-theme="braun"] .grille-row {
+    display: flex;
+    gap: 3px;
+}
+
+body[data-theme="braun"] .grille-row span {
+    width: 3px;
+    height: 3px;
+    border-radius: 50%;
+    background: #8e8b84;
+    box-shadow: inset 0 1px 1px rgba(0, 0, 0, 0.5);
+}
+
+/* Заголовок бренда Braun */
+body[data-theme="braun"] .braun-brand-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: baseline;
+    padding: 0 4px;
+    margin-bottom: 8px;
+}
+
+body[data-theme="braun"] .braun-logo-text {
+    font-size: 15px;
+    font-weight: 900;
+    letter-spacing: 0.18em;
+    color: #111111;
+}
+
+body[data-theme="braun"] .braun-model-no {
+    font-size: 9px;
+    font-weight: 700;
+    letter-spacing: 0.12em;
+    color: #7a7770;
+}
+
+body[data-theme="braun"] .braun-designer-credit {
+    position: absolute;
+    bottom: 6px;
+    left: 0;
+    width: 100%;
+    text-align: center;
+    font-size: 8px;
+    font-weight: 700;
+    letter-spacing: 0.16em;
+    color: #8c8982;
+}
+
+/* Ползунок EIN / AUS */
+body[data-theme="braun"] .braun-hold {
+    position: absolute;
+    top: 7px;
+    right: 36px;
+}
+
+body[data-theme="braun"] .hold-label {
+    color: #63605a !important;
+    font-weight: 800 !important;
+    font-size: 7.5px !important;
+    letter-spacing: 0.05em;
+}
+
+body[data-theme="braun"] .hold-track {
+    background: #bcbab3 !important;
+    border: 1px solid #94918a !important;
+    border-radius: 2px !important;
+    height: 8px !important;
+    width: 24px !important;
+}
+
+body[data-theme="braun"] .hold-orange {
+    background: #e65c00 !important;
+}
+
+body[data-theme="braun"] .hold-slider {
+    background: #ffffff !important;
+    border: 1px solid #7c7972 !important;
+    border-radius: 1px !important;
+}
+
+/* Безель экрана: плоская строгая рамка */
+body[data-theme="braun"] .braun-screen-bezel {
+    width: 308px !important;
+    height: 234px !important;
+    background: #111111 !important;
+    border-radius: 4px !important;
+    padding: 2.5px !important;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.3) !important;
+    margin-bottom: 22px !important;
+}
+
+/* Экран: контрастный швейцарский дисплей цвета светлого льняного листа */
+body[data-theme="braun"] .screen.braun-screen {
+    --screen-text: #0d0d0e;
+    width: 100% !important;
+    height: 100% !important;
+    border-radius: 2px !important;
+    background: #faf9f6 !important;
+    color: var(--screen-text) !important;
+    display: flex !important;
+    flex-direction: column !important;
+    overflow: hidden;
+}
+
+body[data-theme="braun"] .screen.braun-screen .screen-content {
+    flex: 1 1 auto !important;
+    height: calc(100% - 24px) !important;
+    display: flex !important;
+    flex-direction: column !important;
+}
+
+/* Статус-бар */
+body[data-theme="braun"] .status-bar.braun-status-bar {
+    height: 24px !important;
+    padding: 0 10px !important;
+    background: #ebe9e4 !important;
+    border-bottom: 1.5px solid #111111 !important;
+    color: #111111 !important;
+    font-size: 11px !important;
+    font-weight: 800 !important;
+    letter-spacing: 0.08em;
+}
+
+body[data-theme="braun"] .status-icon {
+    font-size: 10px !important;
+    color: #e65c00 !important;
+}
+
+/* Батарея */
+body[data-theme="braun"] .battery-icon.braun-battery {
+    border: 1.5px solid #111111 !important;
+    background: #faf9f6 !important;
+    border-radius: 1px !important;
+    height: 10px !important;
+    width: 22px !important;
+}
+
+body[data-theme="braun"] .battery-icon.braun-battery::after {
+    background-color: #111111 !important;
+}
+
+body[data-theme="braun"] .battery-level {
+    background: #111111 !important;
+}
+
+/* Меню: строгая типографика и чёткое черное выделение */
+body[data-theme="braun"] .menu-list {
+    padding: 0 !important;
+}
+
+body[data-theme="braun"] .menu-item {
+    height: 28px !important;
+    padding: 0 12px !important;
+    font-size: 13.5px !important;
+    font-weight: 600 !important;
+    color: #111111 !important;
+    border-bottom: 1px solid #ebe9e4;
+    letter-spacing: -0.01em;
+}
+
+body[data-theme="braun"] .menu-item.active {
+    background: #111111 !important;
+    color: #ffffff !important;
+    border-bottom: 1px solid #111111 !important;
+}
+
+body[data-theme="braun"] .menu-item.active .menu-arrow {
+    color: #e65c00 !important;
+}
+
+/* Скроллбар */
+body[data-theme="braun"] .ipod-scrollbar {
+    width: 6px !important;
+    background: #ebe9e4 !important;
+    border-left: 1px solid #111111 !important;
+}
+
+body[data-theme="braun"] .ipod-scrollbar-thumb {
+    background: #111111 !important;
+}
+
+/* ==========================================================================
+   Уникальный Now Playing: Analog Radio Tuner (Dieter Rams RT 20)
+   ========================================================================== */
+.braun-np-view {
+    display: flex !important;
+    flex-direction: column !important;
+    justify-content: space-between !important;
+    height: 100% !important;
+    width: 100% !important;
+    padding: 8px 12px 10px !important;
+    box-sizing: border-box !important;
+    background: transparent !important;
+}
+
+.braun-np-main {
+    display: flex;
+    gap: 14px;
+    align-items: center;
+    width: 100%;
+    margin: auto 0 !important;
+}
+
+/* Монохромная гравюра обложки */
+.braun-cover-wrapper {
+    position: relative;
+    width: 102px;
+    height: 102px;
+    flex-shrink: 0;
+    padding: 2px;
+    background: #ffffff;
+    border: 1.5px solid #111111;
+    box-shadow: 2px 2px 0px rgba(0, 0, 0, 0.15);
+}
+
+.braun-cover-img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    display: block;
+    filter: grayscale(1) contrast(1.6) brightness(0.95);
+}
+
+.braun-cover-empty {
+    width: 100%;
+    height: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #111111;
+    font-size: 11px;
+    font-weight: 800;
+    background: #ebe9e4;
+}
+
+/* Метаданные трека */
+.braun-np-meta {
+    flex: 1;
+    min-width: 0;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+}
+
+.braun-np-freq-tag {
+    font-size: 9px;
+    font-weight: 800;
+    color: #e65c00;
+    letter-spacing: 0.1em;
+    margin-bottom: 2px;
+}
+
+.braun-np-title {
+    font-size: 15px;
+    font-weight: 900;
+    color: #111111;
+    line-height: 1.15;
+    margin-bottom: 2px;
+    letter-spacing: -0.02em;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.braun-np-artist {
+    font-size: 13px;
+    font-weight: 700;
+    color: #3d3b38;
+    margin-bottom: 2px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.braun-np-album {
+    font-size: 11px;
+    font-weight: 500;
+    color: #736f66;
+    margin-bottom: 6px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.braun-np-channel {
+    font-size: 10px;
+    font-weight: 800;
+    color: #111111;
+}
+
+/* Аналоговая шкала радиочастот (Tuning Scale) */
+.braun-np-bottom {
+    margin-top: 0 !important;
+    width: 100%;
+}
+
+.braun-scale-legend {
+    display: flex;
+    justify-content: space-between;
+    font-size: 8px;
+    font-weight: 800;
+    color: #63605a;
+    letter-spacing: 0.1em;
+    margin-bottom: 2px;
+}
+
+.braun-tuner-track {
+    width: 100%;
+    height: 14px;
+    background: #ebe9e4;
+    border: 1.5px solid #111111;
+    position: relative;
+    /* Миллиметровые риски шкалы радиоприемника */
+    background-image: repeating-linear-gradient(
+        90deg,
+        #111111 0px,
+        #111111 1px,
+        transparent 1px,
+        transparent 6px
+    );
+}
+
+/* Оранжевый визир частотной настройки */
+.braun-tuner-needle {
+    position: absolute;
+    top: -2px;
+    width: 3px;
+    height: 16px;
+    background: #e65c00;
+    box-shadow: 0 0 2px rgba(230, 92, 0, 0.8);
+    transform: translateX(-50%);
+    pointer-events: none;
+}
+
+.braun-time-row {
+    display: flex;
+    justify-content: space-between;
+    font-size: 10.5px;
+    font-weight: 800;
+    color: #111111;
+    margin-top: 4px;
+    letter-spacing: 0.02em;
+}
+
+.braun-vol-row {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 2px 0;
+}
+
+.braun-vol-row .braun-tuner-track {
+    flex: 1;
+}
+
+/* ==========================================================================
+   Click Wheel: Центрированное рифлёное аналоговое колесо настройки
+   ========================================================================== */
+body[data-theme="braun"] .wheel-container.braun-wheel-wrap {
+    display: flex !important;
+    justify-content: center !important;
+    align-items: center !important;
+    margin: 0 auto !important;
+    width: 220px !important;
+    height: 220px !important;
+}
+
+body[data-theme="braun"] .click-wheel.braun-wheel {
+    width: 220px !important;
+    height: 220px !important;
+    margin: 0 auto !important;
+    background: radial-gradient(circle at 45% 40%, #ffffff 0%, #edebe6 60%, #d8d5cd 100%) !important;
+    border: 2px solid #b8b5ac !important;
+    border-radius: 50% !important;
+    box-shadow:
+        0 8px 20px rgba(0, 0, 0, 0.35),
+        inset 0 2px 3px rgba(255, 255, 255, 0.9),
+        inset 0 -3px 5px rgba(0, 0, 0, 0.15) !important;
+    position: relative;
+}
+
+body[data-theme="braun"] .wheel-button {
+    color: #111111 !important;
+    font-size: 11px !important;
+    font-weight: 800 !important;
+    letter-spacing: 0.08em;
+}
+
+body[data-theme="braun"] .wheel-button:active {
+    color: #e65c00 !important;
+}
+
+/* Центральная кнопка с оранжевой точкой */
+body[data-theme="braun"] .center-button.braun-center-button {
+    width: 76px !important;
+    height: 76px !important;
+    background: radial-gradient(circle at 35% 30%, #f7f6f2 0%, #e2dfd7 70%, #cecac0 100%) !important;
+    border: 1.5px solid #aba79d !important;
+    box-shadow:
+        0 2px 6px rgba(0, 0, 0, 0.25),
+        inset 0 1px 1px #fff !important;
+    display: flex !important;
+    align-items: center;
+    justify-content: center;
+}
+
+body[data-theme="braun"] .braun-orange-dot {
+    width: 14px;
+    height: 14px;
+    border-radius: 50%;
+    background: radial-gradient(circle at 35% 35%, #ff7a1a 0%, #e65c00 65%, #ba4a00 100%);
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.35), inset 0 1px 1px rgba(255, 255, 255, 0.6);
+    pointer-events: none;
+}
+
+body[data-theme="braun"] .center-button.braun-center-button:active {
+    background: #cecac0 !important;
+    box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.3) !important;
+}
